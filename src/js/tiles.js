@@ -63,7 +63,13 @@ function findArea(row, col) {
             dropTiles();
 
             if (score >= settings.levels[level].goal) {
-                Nodes.game.classList.add('win');
+                level++;
+                if (level >= settings.levelNumber) {
+                    level = 0;
+                    Nodes.game.classList.add('super-win');
+                } else {
+                    Nodes.game.classList.add('win');
+                }
                 return;
             } else if (!movesLeft) {
                 Nodes.game.classList.add('lose');
@@ -110,11 +116,11 @@ function findMatchingNeighbours(i, j, color, matrix) {
     }
 }
 
-function blastArea(matrix) {
+function blastArea(matrix, isCompleteBlast) {
     var row, col;
     for (row = 0; row < settings.levels[level].rows; row++) {
         for (col = 0; col < settings.levels[level].cols; col++) {
-            if (matrix[row][col]) destroyTile(row, col);
+            if (isCompleteBlast || matrix[row][col]) destroyTile(row, col);
         }
     }
 }

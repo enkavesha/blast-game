@@ -35,7 +35,8 @@
     background: #fff;
 
     .win &,
-    .lose & {
+    .lose &,
+    .super-win & {
         opacity: 1;
         pointer-events: auto;
     }
@@ -53,6 +54,7 @@
     }
 
     .win & .win-title,
+    .super-win & .super-win-title,
     .lose & .lose-title {
         display: block;
     }
@@ -65,13 +67,16 @@
         font-weight: bold;
         padding: 5%;
         margin: 5%;
+        display: none;
 
         .landscape & {
             font-size: 5vh;
         }
     }
 
-    .lose & .next-button {
-        display: none;
+    .win & .next-button,
+    .lose & .retry-button,
+    .super-win & .restart-button {
+        display: block;
     }
 }
