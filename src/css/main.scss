@@ -1,0 +1,29 @@
+html,
+body {
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #000;
+    font-family: 'Marvin', sans-serif;
+    user-select: none;
+
+    * {
+        box-sizing: border-box;
+    }
+}
+
+.game {
+    width: 100%;
+    height: 100%;
+    margin: 0 auto;
+    padding: 20px;
+
+    @supports (padding: unquote('max(1px,2px)')) {
+        padding-top: unquote('max(20px, env(safe-area-inset-top))');
+        padding-left: unquote('max(20px, env(safe-area-inset-left))');
+        padding-right: unquote('max(20px, env(safe-area-inset-right))');
+        padding-bottom: unquote('max(20px, env(safe-area-inset-bottom))');
+    }
+}

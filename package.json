@@ -1,0 +1,36 @@
+{
+  "name": "blast-game",
+  "version": "1.0.0",
+  "description": "",
+  "main": "gulpfile.js",
+  "dependencies": {
+    "browser-sync": "^2.26.7",
+    "del": "^5.1.0",
+    "ejs-loader": "^0.3.5",
+    "filemanager-webpack-plugin": "^2.0.5",
+    "gulp": "^4.0.1",
+    "gulp-autoprefixer": "^6.1.0",
+    "gulp-clean-css": "^3.10.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-rename": "^1.4.0",
+    "gulp-sass": "*",
+    "gulp-uglify": "^3.0.2",
+    "html-webpack-plugin": "^3.2.0",
+    "sass": "^1.55.0",
+    "webpack": "^4.30.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "webpack --mode development",
+    "prod": "webpack --mode production"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "has-gulplog": "^0.1.0",
+    "html-loader": "^0.5.5",
+    "parallel-webpack": "^2.4.0",
+    "pug-html-loader": "^1.1.5",
+    "webpack-cli": "^3.3.6"
+  }
+}

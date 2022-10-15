@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Blast game</title>
+
+    <link rel="stylesheet" href="src-bundle/style.css"/>
+
+</head>
+
+<body>
+    <div id="game" class="game">
+    </div>
+</body>
+
+<script src="src-bundle/jsbundle.js"></script>
+<script>
+
+    var game = new Game();
+
+    window.onload = function () {
+        function startGame() {
+            document.removeEventListener('visibility-visible', startGame);
+            game.start();
+        }
+
+        if (document.getElementById('game').classList.contains('visible')) {
+            startGame();
+        } else {
+            document.addEventListener('visibility-visible', startGame);
+        }
+    }
+</script>
+</html>

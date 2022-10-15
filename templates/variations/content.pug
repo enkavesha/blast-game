@@ -1,0 +1,22 @@
+//- index.pug
+extends ../layout
+block content
+    include ../includes/content.html
+    script
+        include ../../src-bundle/jsbundle.min.js
+    script.
+
+        window.onload = function () {
+            var game = new Game();
+
+            function startGame() {
+                document.removeEventListener('visibility-visible', startGame);
+                game.start();
+            }
+
+            if (document.getElementById('playable').classList.contains('visible')) {
+                startGame();
+            } else {
+                document.addEventListener('visibility-visible', startGame);
+            }
+        };
