@@ -19,6 +19,9 @@ body {
     height: 100%;
     margin: 0 auto;
     padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
     @supports (padding: unquote('max(1px,2px)')) {
         padding-top: unquote('max(20px, env(safe-area-inset-top))');
