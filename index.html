@@ -11,8 +11,20 @@
 
 <body>
     <div id="game" class="game">
+        <div class="counters">
+            <div class="counter">Ходов осталось: <span id="moves-left"></span></div>
+            <div class="counter">Очки: <span id="score"></span></div>
+            <div class="counter">Цель: <span id="goal"></span></div>
+        </div>
         <div id="field-wrapper" class="field-wrapper">
             <canvas id="field" class="field"></canvas>
+            <div class="menu">
+                <div class="title win-title">Так держать!</div>
+                <div class="title lose-title">Ой!</div>
+
+                <div class="button next-button">Следующий уровень</div>
+                <div class="button retry-button">Переиграть уровень</div>
+            </div>
         </div>
     </div>
 </body>
@@ -20,12 +32,12 @@
 <script src="src-bundle/jsbundle.js"></script>
 <script>
 
-    var game = new Game();
+    // var game = new Game();
 
     window.onload = function () {
         function startGame() {
             document.removeEventListener('visibility-visible', startGame);
-            game.start();
+            start();
         }
 
         if (document.getElementById('game').classList.contains('visible')) {
