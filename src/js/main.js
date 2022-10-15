@@ -9,6 +9,7 @@ var settings = {
                 cols: 5,
                 minBlastCount: 2,
                 moves: 10,
+                shuffles: 1,
                 get colorNumber() {
                     return Math.floor(4 + this.id / 2)
                 },
@@ -22,6 +23,7 @@ var settings = {
                 cols: 5,
                 minBlastCount: 2,
                 moves: 10,
+                shuffles: 1,
                 get colorNumber() {
                     return Math.floor(4 + this.id / 2)
                 },
@@ -35,6 +37,7 @@ var settings = {
                 cols: 5,
                 minBlastCount: 2,
                 moves: 10,
+                shuffles: 2,
                 get colorNumber() {
                     return Math.floor(4 + this.id / 2)
                 },
@@ -52,9 +55,11 @@ var settings = {
         score: document.getElementById('score'),
         movesLeft: document.getElementById('moves-left'),
         goal: document.getElementById('goal'),
+        shuffles: document.getElementById('shuffles-left'),
         nextButton: document.getElementById('next-button'),
         retryButton: document.getElementById('retry-button'),
         restartButton: document.getElementById('restart-button'),
+        shuffleButton: document.getElementById('shuffle-button'),
     },
 
     ctx,
@@ -68,6 +73,7 @@ var settings = {
     score = 0,
     scoreInterval,
     movesLeft,
+    shufflesLeft,
     controlsDisabled = false;
 
 function start() {
@@ -80,9 +86,10 @@ function startLevel() {
         blastArea(null, true);
     }
     score = 0;
+    shufflesLeft = settings.levels[level].shuffles;
     createField();
     setCounters();
-    Nodes.game.classList.remove('win', 'lose', 'super-win');
+    Nodes.game.classList.remove('win', 'lose', 'super-win', 'no-shuffles');
     controlsDisabled = false;
 }
 
@@ -120,5 +127,9 @@ function addEventListeners() {
     })
     Nodes.restartButton.addEventListener('click', function () {
         startLevel();
+    })
+    Nodes.shuffleButton.addEventListener('click', function () {
+        if (controlsDisabled) return;
+        shuffleField();
     })
 }

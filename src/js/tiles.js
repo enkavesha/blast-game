@@ -1,13 +1,21 @@
 class Tile {
-    constructor(row, col) {
+    constructor(row, col, color) {
         this._row = row;
         this._col = col;
-        this.color = Math.floor(Math.random() * settings.levels[level].colorNumber);
-        this.bgColor = settings.colors[this.color];
+        this._color = color > -1 ? color : Math.floor(Math.random() * settings.levels[level].colorNumber);
+        this._bgColor = settings.colors[this._color];
     }
 
     set row(value) {
         this._row = value;
+    }
+
+    set col(value) {
+        this._col = value;
+    }
+
+    set bgColor(value) {
+        this._bgColor = value;
     }
 
     get row() {
@@ -17,14 +25,23 @@ class Tile {
     get col() {
         return this._col;
     }
+
+    get color() {
+        return this._color;
+    }
+
+    get bgColor() {
+        return this._bgColor;
+    }
 }
 
-function generateTile(row, col) {
-    tiles[row][col] = new Tile(row, col);
+function generateTile(row, col, color) {
+    tiles[row][col] = new Tile(row, col, color);
 }
 
-function renderTile(row, col) {
-    ctx.fillStyle = tiles[row][col].bgColor;
+function renderTile(row, col, destArray) {
+    destArray = destArray || tiles;
+    ctx.fillStyle = destArray[row][col].bgColor;
     ctx.fillRect(tileSize * col, tileSize * row, tileSize, tileSize);
 }
 
@@ -125,17 +142,20 @@ function blastArea(matrix, isCompleteBlast) {
     }
 }
 
-function destroyTile(row, col) {
+function destroyTile(row, col, isShuffling) {
+    if (isShuffling) return;
     tiles[row][col] = 0;
     ctx.fillStyle = '#000';
     ctx.fillRect(tileSize * col, tileSize * row, tileSize, tileSize);
 }
 
-function moveTile(row, col, destRow) {
-    tiles[destRow][col] = tiles[row][col];
-    tiles[destRow][col].row = destRow;
-    destroyTile(row, col);
-    renderTile(destRow, col);
+function moveTile(row, col, destRow, destCol, destArray) {
+    destArray = destArray || tiles;
+    destArray[destRow][destCol] = tiles[row][col];
+    destArray[destRow][destCol].row = destRow;
+    destArray[destRow][destCol].col = destCol;
+    destroyTile(row, col, true);
+    renderTile(destRow, destCol, destArray);
 }
 
 function dropTiles() {
@@ -150,7 +170,7 @@ function dropTiles() {
                     prevRow--;
                     continue;
                 }
-                moveTile(prevRow, col, curRow);
+                moveTile(prevRow, col, curRow, col);
                 prevRow--;
                 curRow--;
             }
@@ -166,5 +186,40 @@ function generateNewTiles() {
             generateTile(row, col);
             renderTile(row, col);
         }
+    }
+}
+
+function shuffleField() {
+    var id, i = 0, row, col, newRow, newCol, length, idArray = [], shuffledTiles = [];
+
+    length = settings.levels[level].rows * settings.levels[level].cols;
+
+    for (row = 0; row < settings.levels[level].rows; row++) {
+        if (!shuffledTiles[row]) shuffledTiles[row] = [];
+    }
+
+    while (idArray.length < length) {
+        id = Math.floor(Math.random() * length);
+        if (idArray.indexOf(id) === -1) {
+            idArray.push(id);
+            row = Math.floor(i / settings.levels[level].cols);
+            col = i - settings.levels[level].cols * row;
+            newRow = Math.floor(id / settings.levels[level].cols);
+            newCol = id - settings.levels[level].cols * newRow;
+            moveTile(row, col, newRow, newCol, shuffledTiles);
+            i++;
+        }
+    }
+
+    for (row = 0; row < settings.levels[level].rows; row++) {
+        for (col = 0; col < settings.levels[level].cols; col++) {
+            tiles[row][col] = shuffledTiles[row][col];
+        }
+    }
+
+    setCounters(null, null, null, --shufflesLeft);
+
+    if (!shufflesLeft) {
+        Nodes.game.classList.add('no-shuffles');
     }
 }

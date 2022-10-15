@@ -1,8 +1,9 @@
-function setCounters(moves, score, goal) {
+function setCounters(moves, score, goal, shuffles) {
     movesLeft = moves >= 0 ? moves : settings.levels[level].moves;
     Nodes.movesLeft.innerText = movesLeft;
     Nodes.score.innerText = score || '0';
     Nodes.goal.innerText = goal || settings.levels[level].goal;
+    Nodes.shuffles.innerText = shuffles ? shuffles : shufflesLeft;
 }
 
 function updateScore() {

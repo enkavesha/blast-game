@@ -28,14 +28,12 @@
                 <div id="restart-button" class="button restart-button">Начать заново</div>
             </div>
         </div>
+        <div id="shuffle-button" class="button shuffle-button">Перемешать <span id="shuffles-left"></span></div>
     </div>
 </body>
 
 <script src="src-bundle/jsbundle.js"></script>
 <script>
-
-    // var game = new Game();
-
     window.onload = function () {
         function startGame() {
             document.removeEventListener('visibility-visible', startGame);

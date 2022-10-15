@@ -7,14 +7,12 @@ block content
     script.
 
         window.onload = function () {
-            var game = new Game();
-
             function startGame() {
                 document.removeEventListener('visibility-visible', startGame);
-                game.start();
+                this.start();
             }
 
-            if (document.getElementById('playable').classList.contains('visible')) {
+            if (document.getElementById('game').classList.contains('visible')) {
                 startGame();
             } else {
                 document.addEventListener('visibility-visible', startGame);

@@ -62,21 +62,31 @@
     .button {
         background: #000;
         color: #fff;
-        text-align: center;
-        font-size: 5vw;
-        font-weight: bold;
-        padding: 5%;
-        margin: 5%;
         display: none;
-
-        .landscape & {
-            font-size: 5vh;
-        }
     }
 
     .win & .next-button,
     .lose & .retry-button,
     .super-win & .restart-button {
         display: block;
+    }
+}
+
+.button {
+    background: #fff;
+    color: #000;
+    text-align: center;
+    font-size: 5vw;
+    font-weight: bold;
+    padding: 5%;
+    margin: 5%;
+
+    .landscape & {
+        font-size: 5vh;
+    }
+
+    .no-shuffles &.shuffle-button {
+        opacity: 0.5;
+        pointer-events: none;
     }
 }
