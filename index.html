@@ -10,7 +10,15 @@
 </head>
 
 <body>
-    <div id="game" class="game">
+    <div id="game" class="game loading">
+        <div class="loading-screen">
+            <div class="progress-wrapper">
+                <div class="progress-bar">
+                    <div class="progress-inner" id="progress-inner"></div>
+                </div>
+                Loading...
+            </div>
+        </div>
         <div class="counters">
             <div class="counter">Ходов осталось: <span id="moves-left"></span></div>
             <div class="counter">Очки: <span id="score"></span></div>

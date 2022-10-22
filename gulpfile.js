@@ -5,6 +5,7 @@ const cleanCSS = require('gulp-clean-css');
 const rename = require('gulp-rename');
 const browsersync = require('browser-sync');
 const concat = require('gulp-concat');
+const order = require('gulp-order');
 const autoprefixer = require('gulp-autoprefixer');
 const uglify = require('gulp-uglify');
 const del = require('del');
@@ -43,7 +44,11 @@ function css() {
 }
 
 function js() {
-    return gulp.src('src/js/**/*.js')
+    return gulp.src(['src/js/**/*.js'])
+        .pipe(order([
+            'src/js/main.js',
+            'src/js/**/*.js',
+        ], {base: __dirname}))
         .pipe(concat('jsbundle.js'))
         .pipe(gulp.dest('./src-bundle/'))
         .pipe(rename('jsbundle.min.js'))
