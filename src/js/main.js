@@ -1,6 +1,9 @@
 var settings = {
         colors: ['#00A676', '#E9E3E6', '#3C91E6', '#393D3F', '#FE6D73'],
         scoreChangeTime: 500,
+        zoomOutSpeed: 500,
+        zoomInSpeed: 500,
+        dropSpeed: 500,
         levelNumber: 3,
         levels: {
             0: {
@@ -77,8 +80,10 @@ var settings = {
     ch,
     ctxBounds,
     tiles = [],
-    tileSize,
+    tileWidth,
+    tileHeight,
     blastCount,
+    tilesWillDrop = false,
     level = 0,
     score = 0,
     scoreInterval,
@@ -87,10 +92,14 @@ var settings = {
     controlsDisabled = false;
 
 function start() {
-    startLevel();
-    addEventListeners();
     loadImages(images, function () {
-        Nodes.game.classList.remove('loading');
+        startLevel();
+        addEventListeners();
+        animateTiles();
+
+        setTimeout(function () {
+            Nodes.game.classList.remove('loading');
+        }, 500);
     })
 }
 
@@ -111,17 +120,19 @@ function createField() {
 
     ctx = Nodes.field.getContext('2d');
     cw = Nodes.fieldWrapper.getBoundingClientRect().width;
-    tileSize = cw / settings.levels[level].cols;
-    ch = tileSize * settings.levels[level].rows;
+    tileWidth = cw / settings.levels[level].cols;
+    tileHeight = tileWidth / 0.89;
+    ch = tileHeight * settings.levels[level].rows;
     Nodes.field.width = cw;
-    Nodes.field.height = ch;
+    if (Nodes.field.height < ch) {
+        Nodes.field.height = ch;
+    }
     ctxBounds = Nodes.field.getBoundingClientRect();
 
     for (row = 0; row < settings.levels[level].rows; row++) {
         if (!tiles[row]) tiles[row] = [];
         for (col = 0; col < settings.levels[level].cols; col++) {
             generateTile(row, col);
-            renderTile(row, col);
         }
     }
 }
@@ -150,16 +161,33 @@ function addEventListeners() {
     })
 
     Nodes.nextButton.addEventListener('click', function () {
+        level++;
         startLevel();
     })
     Nodes.retryButton.addEventListener('click', function () {
         startLevel();
     })
     Nodes.restartButton.addEventListener('click', function () {
+        level = 0;
         startLevel();
     })
     Nodes.shuffleButton.addEventListener('click', function () {
         if (controlsDisabled) return;
         shuffleField();
     })
+}
+
+function animateTiles() {
+    var row, col;
+    ctx.clearRect(0, 0, cw, ch);
+
+    for (row = 0; row < settings.levels[level].rows; row++) {
+        for (col = 0; col < settings.levels[level].cols; col++) {
+            if (tiles[row] && tiles[row][col]) {
+                tiles[row][col].update();
+            }
+        }
+    }
+
+    requestAnimationFrame(animateTiles);
 }

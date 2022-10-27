@@ -39,6 +39,7 @@
     .super-win & {
         opacity: 1;
         pointer-events: auto;
+        transition: opacity 0.5s ease-in-out;
     }
 
     .title {
