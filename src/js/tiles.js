@@ -129,10 +129,11 @@ function clickTile(x, y) {
     col = Math.floor(x / tileWidth);
 
     findArea(row, col);
+    processTiles();
 }
 
 function findArea(row, col) {
-    var color, blastMatrix, i, j, dropTimeout;
+    var color, i, j;
 
     color = tiles[row][col].color;
     blastMatrix = [];
@@ -148,38 +149,40 @@ function findArea(row, col) {
     blastMatrix[row][col] = 1;
 
     findMatchingNeighbours(row, col, color, blastMatrix);
+}
 
-    if (blastCount >= settings.levels[level].minBlastCount) {
-        controlsDisabled = true;
-        blastArea(blastMatrix);
-        setCounters(--movesLeft, score);
-        updateScore();
+function processTiles() {
+    if (blastCount < settings.levels[level].minBlastCount) return;
+    var dropTimeout;
+    controlsDisabled = true;
+    blastArea(blastMatrix);
+    setCounters(--movesLeft, score);
+    updateScore();
+    setTimeout(function () {
+        dropTiles();
+        dropTimeout = tilesWillDrop ? settings.dropSpeed + 100 : 0;
+        tilesWillDrop = false;
+
         setTimeout(function () {
-            dropTiles();
-            dropTimeout = tilesWillDrop ? settings.dropSpeed + 100 : 0;
-            tilesWillDrop = false;
+            generateNewTiles();
 
             setTimeout(function () {
-                generateNewTiles();
-
-                setTimeout(function () {
-                    if (score >= settings.levels[level].goal) {
-                        if (level + 1 >= settings.levelNumber) {
-                            Nodes.game.classList.add('super-win');
-                        } else {
-                            Nodes.game.classList.add('win');
-                        }
-                        controlsDisabled = true;
-                    } else if (!movesLeft) {
-                        Nodes.game.classList.add('lose');
-                        controlsDisabled = true;
-                    } else{
-                        controlsDisabled = false;
+                if (score >= settings.levels[level].goal) {
+                    if (level + 1 >= settings.levelNumber) {
+                        Nodes.game.classList.add('super-win');
+                    } else {
+                        Nodes.game.classList.add('win');
                     }
-                }, settings.zoomInSpeed + 200)
-            }, dropTimeout)
-        }, settings.zoomOutSpeed)
-    }
+                    controlsDisabled = true;
+                } else if (!movesLeft) {
+                    Nodes.game.classList.add('lose', 'no-shuffles');
+                    controlsDisabled = true;
+                } else {
+                    controlsDisabled = false;
+                }
+            }, settings.zoomInSpeed + 200)
+        }, dropTimeout)
+    }, settings.zoomOutSpeed)
 }
 
 function isMatching(row, col, color, matrix) {
@@ -215,6 +218,21 @@ function findMatchingNeighbours(i, j, color, matrix) {
         blastCount++;
         if (i + 1) tilesWillDrop = true;
         findMatchingNeighbours(i + 1, j, color, matrix);
+    }
+}
+
+
+function findMove() {
+    moveExists = false;
+    var i, j;
+    for (i = 0; i < settings.levels[level].rows; i++) {
+        for (j = 0; j < settings.levels[level].cols; j++) {
+            findArea(i, j);
+            if (blastCount >= settings.levels[level].minBlastCount) {
+                moveExists = true;
+                return;
+            }
+        }
     }
 }
 

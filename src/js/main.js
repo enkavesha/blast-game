@@ -83,6 +83,8 @@ var settings = {
     tileWidth,
     tileHeight,
     blastCount,
+    blastMatrix,
+    moveExists = false,
     tilesWillDrop = false,
     level = 0,
     score = 0,
@@ -174,6 +176,11 @@ function addEventListeners() {
     Nodes.shuffleButton.addEventListener('click', function () {
         if (controlsDisabled) return;
         shuffleField();
+        findMove();
+        if (!moveExists) {
+            Nodes.game.classList.add('lose', 'no-shuffles');
+            controlsDisabled = true;
+        }
     })
 }
 
