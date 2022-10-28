@@ -5,8 +5,9 @@ var settings = {
         zoomInSpeed: 500,
         dropSpeed: 500,
         levelNumber: 3,
-        supertileActivationNumber: 2,
-        fieldblastActivationNumber: 5,
+        supertileActivationNumber: 5,
+        fieldblastActivationNumber: 10,
+        chainSuperTiles: false,
         levels: {
             0: {
                 id: 0,

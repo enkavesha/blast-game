@@ -169,7 +169,7 @@ function findSuperArea(row, col) {
             if(!blastMatrix[row][i]) {
                 blastCount++;
                 blastMatrix[row][i] = 1;
-                if (i !== col && tiles[row][i]._booster) {
+                if (settings.chainSuperTiles && i !== col && tiles[row][i]._booster) {
                     findSuperArea(row, i);
                 }
             }
@@ -180,7 +180,7 @@ function findSuperArea(row, col) {
             if(!blastMatrix[i][col]) {
                 blastCount++;
                 blastMatrix[i][col] = 1;
-                if (i !== row && tiles[i][col]._booster) {
+                if (settings.chainSuperTiles && i !== row && tiles[i][col]._booster) {
                     findSuperArea(i, col);
                 }
             }
