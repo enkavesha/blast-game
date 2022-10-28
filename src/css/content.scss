@@ -86,7 +86,8 @@
         font-size: 5vh;
     }
 
-    .no-shuffles &.shuffle-button {
+    .no-shuffles &.shuffle-button,
+    .no-bombs &.bomb-button {
         opacity: 0.5;
         pointer-events: none;
     }

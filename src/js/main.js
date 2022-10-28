@@ -7,7 +7,7 @@ var settings = {
         levelNumber: 3,
         supertileActivationNumber: 5,
         fieldblastActivationNumber: 10,
-        chainSuperTiles: false,
+        chainSuperTiles: true,
         levels: {
             0: {
                 id: 0,
@@ -16,6 +16,8 @@ var settings = {
                 minBlastCount: 2,
                 moves: 10,
                 shuffles: 1,
+                bombs: 1,
+                bombRadius: 1,
                 get colorNumber() {
                     return Math.floor(4 + this.id / 2)
                 },
@@ -30,6 +32,8 @@ var settings = {
                 minBlastCount: 2,
                 moves: 10,
                 shuffles: 1,
+                bombs: 1,
+                bombRadius: 1,
                 get colorNumber() {
                     return Math.floor(4 + this.id / 2)
                 },
@@ -44,6 +48,8 @@ var settings = {
                 minBlastCount: 2,
                 moves: 10,
                 shuffles: 2,
+                bombs: 1,
+                bombRadius: 1,
                 get colorNumber() {
                     return Math.floor(4 + this.id / 2)
                 },
@@ -63,10 +69,12 @@ var settings = {
         movesLeft: document.getElementById('moves-left'),
         goal: document.getElementById('goal'),
         shuffles: document.getElementById('shuffles-left'),
+        bombs: document.getElementById('bombs-left'),
         nextButton: document.getElementById('next-button'),
         retryButton: document.getElementById('retry-button'),
         restartButton: document.getElementById('restart-button'),
         shuffleButton: document.getElementById('shuffle-button'),
+        bombButton: document.getElementById('bomb-button'),
     },
 
     images = {
@@ -98,6 +106,8 @@ var settings = {
     scoreInterval,
     movesLeft,
     shufflesLeft,
+    bombsLeft,
+    bombActive = false,
     controlsDisabled = false;
 
 function start() {
@@ -118,9 +128,10 @@ function startLevel() {
     }
     score = 0;
     shufflesLeft = settings.levels[level].shuffles;
+    bombsLeft = settings.levels[level].bombs;
     createField();
     setCounters();
-    Nodes.game.classList.remove('win', 'lose', 'super-win', 'no-shuffles');
+    Nodes.game.classList.remove('win', 'lose', 'super-win', 'no-shuffles', 'no-bombs');
     controlsDisabled = false;
 }
 
@@ -185,8 +196,16 @@ function addEventListeners() {
         shuffleField();
         findMove();
         if (!moveExists) {
-            Nodes.game.classList.add('lose', 'no-shuffles');
+            Nodes.game.classList.add('lose', 'no-shuffles', 'no-bombs');
             controlsDisabled = true;
+        }
+    })
+    Nodes.bombButton.addEventListener('click', function () {
+        if (controlsDisabled) return;
+        bombActive = true;
+        setCounters(movesLeft, score, null, shufflesLeft, --bombsLeft);
+        if (!bombsLeft) {
+            Nodes.game.classList.add('no-bombs');
         }
     })
 }
