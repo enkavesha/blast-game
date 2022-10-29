@@ -9,7 +9,6 @@ class Tile {
         this._x = x || tileWidth * this._col + 1 + (tileWidth - this._width) / 2;
         this._y = y || tileHeight * this._row + 1 + (tileHeight - this._height) / 2;
         this._color = color > -1 ? color : Math.floor(Math.random() * settings.levels[level].colorNumber);
-        this._bgColor = settings.colors[this._color];
         this._img = loadedImages['tile' + this._color];
         this._zoomOut = false;
         this._zoomStartTime = 0;
@@ -19,6 +18,11 @@ class Tile {
         this._startY = this._y;
         this._maxX = tileWidth * col + 1 + (tileWidth - this._width) / 2;
         this._maxY = tileHeight * row + 1 + (tileHeight - this._height) / 2;
+        this._toRight = this._maxX > this._x;
+        this._toBottom = this._maxY > this._y;
+        this._isChecked = false;
+        this._isMovingX = false;
+        this._isMovingY = false;
 
         this.update = function () {
             if (!this._isVisible) return;
@@ -42,21 +46,34 @@ class Tile {
                 var newX = this._startX + (this._maxX - this._startX) / settings.dropSpeed * (now - this._creationTime),
                     newY = this._startY + (this._maxY - this._startY) / settings.dropSpeed * (now - this._creationTime);
 
-                if (newX <= this._maxX) {
+                if ((this._toRight && newX <= this._maxX) || (!this._toRight && newX >= this._maxX)) {
                     this._x = newX;
+                    this._isMovingX = true;
                 } else {
                     this._x = this._maxX;
+                    if (this._isMovingX) {
+                        this._isChecked = false;
+                        this._isMovingX = false;
+                    }
                 }
 
-                if (newY <= this._maxY) {
+                if ((this._toBottom && newY <= this._maxY) || (!this._toBottom && newY >= this._maxY)) {
                     this._y = newY;
+                    this._isMovingY = true;
                 } else {
                     this._y = this._maxY;
+                    if (this._isMovingY) {
+                        this._isChecked = false;
+                        this._isMovingY = false;
+                    }
                 }
             }
             ctx.drawImage(this._img, this._x, this._y, this._width, this._height);
             if (this._booster) {
                 ctx.drawImage(loadedImages['star' + this._booster], this._x, this._y, this._width, this._height);
+            }
+            if (this._isChecked) {
+                ctx.drawImage(loadedImages['checked'], this._x, this._y, this._width, this._height);
             }
         }
         this._booster = booster;
@@ -68,10 +85,6 @@ class Tile {
 
     set col(value) {
         this._col = value;
-    }
-
-    set bgColor(value) {
-        this._bgColor = value;
     }
 
     set x(value) {
@@ -90,6 +103,10 @@ class Tile {
         this._zoomStartTime = value;
     }
 
+    set isChecked(value) {
+        this._isChecked = value;
+    }
+
     get row() {
         return this._row;
     }
@@ -100,10 +117,6 @@ class Tile {
 
     get color() {
         return this._color;
-    }
-
-    get bgColor() {
-        return this._bgColor;
     }
 
     get img() {
@@ -117,6 +130,10 @@ class Tile {
     get y() {
         return this._y;
     }
+
+    get booster() {
+        return this._booster;
+    }
 }
 
 function clickTile(x, y) {
@@ -124,9 +141,13 @@ function clickTile(x, y) {
     row = Math.floor(y / tileHeight);
     col = Math.floor(x / tileWidth);
     tilesWillDrop = false;
+    hasSuperTile = false;
     createBlastMatrix(true);
 
-    if (bombActive) {
+    if (teleportActive) {
+        teleportTiles(row, col);
+        return;
+    } else if (bombActive) {
         setCounters(movesLeft, score, null, shufflesLeft, --bombsLeft);
         if (!bombsLeft) {
             Nodes.game.classList.add('no-bombs');
@@ -139,15 +160,17 @@ function clickTile(x, y) {
     } else {
         findArea(row, col);
         countBlastTiles();
-        checkForSuperTile(row, col);
+        if (!hasSuperTile) {
+            checkForSuperTile(row, col);
+        }
     }
     countBlastTiles();
 
-    processTiles();
+    processTiles(row, col);
 }
 
 function findArea(row, col) {
-    var color;
+    var color, i, j;
 
     color = tiles[row][col].color;
 
@@ -155,6 +178,17 @@ function findArea(row, col) {
     blastExtremePoints = {x1: col, x2: col, y1: row, y2: row, width: 1, height: 1};
 
     findMatchingNeighbours(row, col, color, blastMatrix);
+
+    if (settings.chainSuperTiles) {
+        for (i = 0; i < settings.levels[level].rows; i++) {
+            for (j = 0; j < settings.levels[level].cols; j++) {
+                if (blastMatrix[i][j] && tiles[i][j].booster) {
+                    findSuperArea(i, j);
+                    hasSuperTile = true;
+                }
+            }
+        }
+    }
 }
 
 function findSuperArea(row, col) {
@@ -211,7 +245,35 @@ function findBombArea(row, col) {
             }
         }
     }
-    blastExtremePoints = {x1: x1, x2: x2, y1: y1, y2: y2, width: x2 - x2, height: y2 - y1}
+    updateExtremePoints(y1, x1);
+    updateExtremePoints(y2, x2);
+    blastExtremePoints.width = blastExtremePoints.x2 - blastExtremePoints.x1 + 1;
+    blastExtremePoints.height = blastExtremePoints.y2 - blastExtremePoints.y1 + 1;
+}
+
+function teleportTiles(row, col) {
+    tiles[row][col].isChecked = true;
+    if (!teleportingTile) {
+        teleportingTile = new Tile(row, col, tiles[row][col]._color, null, null, 1, tiles[row][col].booster);
+    } else {
+        if (row === teleportingTile.row && col === teleportingTile.col) return;
+
+        tiles[teleportingTile.row][teleportingTile.col] = new Tile(teleportingTile.row, teleportingTile.col, tiles[row][col].color, tiles[row][col].x, tiles[row][col].y, 1, tiles[row][col].booster);
+        tiles[row][col] = new Tile(row, col, teleportingTile.color, teleportingTile.x, teleportingTile.y, 1, teleportingTile.booster);
+
+        tiles[teleportingTile.row][teleportingTile.col].isChecked = true;
+        tiles[row][col].isChecked = true;
+
+        teleportingTile = false;
+        teleportActive = false;
+
+        setCounters(movesLeft, score, null, shufflesLeft, bombsLeft, --teleportsLeft);
+
+        if (!teleportsLeft) {
+            Nodes.game.classList.add('no-teleports');
+        }
+        Nodes.teleportButton.classList.remove('active');
+    }
 }
 
 function createBlastMatrix(isEmpty) {
@@ -240,11 +302,12 @@ function countBlastTiles() {
     }
 }
 
-function processTiles() {
-    if (blastCount < settings.levels[level].minBlastCount) return;
+function processTiles(row, col) {
+    if ((tiles[row][col]._booster && blastCount < settings.levels[level].minBlastCount - 1) ||
+        (!tiles[row][col]._booster && blastCount < settings.levels[level].minBlastCount)) return;
     var dropTimeout;
     controlsDisabled = true;
-    blastArea(blastMatrix);
+    blastArea();
     setCounters(--movesLeft, score);
     updateScore();
     setTimeout(function () {
@@ -264,7 +327,7 @@ function processTiles() {
                     }
                     controlsDisabled = true;
                 } else if (!movesLeft) {
-                    Nodes.game.classList.add('lose', 'no-shuffles', 'no-bombs');
+                    Nodes.game.classList.add('lose');
                     controlsDisabled = true;
                 } else {
                     controlsDisabled = false;
@@ -274,39 +337,35 @@ function processTiles() {
     }, settings.zoomOutSpeed + settings.animationDelay)
 }
 
-function isMatching(row, col, color, matrix) {
+function isMatching(row, col, color) {
     return (col >= 0 && col < settings.levels[level].cols && row >= 0 && row < settings.levels[level].rows) &&
-        tiles[row][col].color === color && !matrix[row][col];
+        tiles[row][col].color === color && !blastMatrix[row][col];
 }
 
-function findMatchingNeighbours(i, j, color, matrix) {
+function findMatchingNeighbours(i, j, color) {
     //top cell
-    if (isMatching(i - 1, j, color, matrix)) {
-        matrix[i - 1][j] = 1;
-        // if (i - 1) tilesWillDrop = true;
+    if (isMatching(i - 1, j, color)) {
+        blastMatrix[i - 1][j] = 1;
         updateExtremePoints(i - 1, j);
-        findMatchingNeighbours(i - 1, j, color, matrix);
+        findMatchingNeighbours(i - 1, j, color);
     }
     //left cell
-    if (isMatching(i, j - 1, color, matrix)) {
-        matrix[i][j - 1] = 1;
-        // if (i) tilesWillDrop = true;
+    if (isMatching(i, j - 1, color)) {
+        blastMatrix[i][j - 1] = 1;
         updateExtremePoints(i, j - 1);
-        findMatchingNeighbours(i, j - 1, color, matrix);
+        findMatchingNeighbours(i, j - 1, color);
     }
     //right cell
-    if (isMatching(i, j + 1, color, matrix)) {
-        matrix[i][j + 1] = 1;
-        // if (i) tilesWillDrop = true;
+    if (isMatching(i, j + 1, color)) {
+        blastMatrix[i][j + 1] = 1;
         updateExtremePoints(i, j + 1);
-        findMatchingNeighbours(i, j + 1, color, matrix);
+        findMatchingNeighbours(i, j + 1, color);
     }
     //bottom cell
-    if (isMatching(i + 1, j, color, matrix)) {
-        matrix[i + 1][j] = 1;
-        // if (i + 1) tilesWillDrop = true;
+    if (isMatching(i + 1, j, color)) {
+        blastMatrix[i + 1][j] = 1;
         updateExtremePoints(i + 1, j);
-        findMatchingNeighbours(i + 1, j, color, matrix);
+        findMatchingNeighbours(i + 1, j, color);
     }
 }
 
@@ -360,11 +419,11 @@ function findMove() {
     }
 }
 
-function blastArea(matrix, isCompleteBlast) {
+function blastArea(isCompleteBlast) {
     var row, col;
     for (row = 0; row < settings.levels[level].rows; row++) {
         for (col = 0; col < settings.levels[level].cols; col++) {
-            if ((isCompleteBlast || matrix[row][col]) && tiles[row] && tiles[row][col]) {
+            if ((isCompleteBlast || blastMatrix[row][col]) && tiles[row] && tiles[row][col]) {
                 tiles[row][col]._zoomOut = true;
                 tiles[row][col]._zoomStartTime = Date.now();
             }

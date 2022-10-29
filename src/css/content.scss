@@ -80,7 +80,7 @@
     font-size: 5vw;
     font-weight: bold;
     padding: 5%;
-    margin: 5%;
+    margin: 10px;
 
     .landscape & {
         font-size: 5vh;
@@ -90,8 +90,10 @@
         background: red;
     }
 
+    .lose &,
     .no-shuffles &.shuffle-button,
-    .no-bombs &.bomb-button {
+    .no-bombs &.bomb-button,
+    .no-teleports &.teleport-button, {
         opacity: 0.5;
         pointer-events: none;
     }
