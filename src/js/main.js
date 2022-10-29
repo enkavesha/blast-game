@@ -103,7 +103,8 @@ var settings = {
     tilesWillDrop = false,
     level = 0,
     score = 0,
-    scoreInterval,
+    curScore = 0,
+    scoreStartTime = 0,
     movesLeft,
     shufflesLeft,
     bombsLeft,
@@ -114,7 +115,7 @@ function start() {
     loadImages(images, function () {
         startLevel();
         addEventListeners();
-        animateTiles();
+        animateGame();
 
         setTimeout(function () {
             Nodes.game.classList.remove('loading');
@@ -208,19 +209,4 @@ function addEventListeners() {
             Nodes.game.classList.add('no-bombs');
         }
     })
-}
-
-function animateTiles() {
-    var row, col;
-    ctx.clearRect(0, 0, cw, ch);
-
-    for (row = 0; row < settings.levels[level].rows; row++) {
-        for (col = 0; col < settings.levels[level].cols; col++) {
-            if (tiles[row] && tiles[row][col]) {
-                tiles[row][col].update();
-            }
-        }
-    }
-
-    requestAnimationFrame(animateTiles);
 }

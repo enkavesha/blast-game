@@ -8,29 +8,7 @@ function setCounters(moves, score, goal, shuffles, bombs) {
 }
 
 function updateScore() {
-    if (scoreInterval) {
-        clearInterval(scoreInterval);
-    }
-    var curScore = parseInt(Nodes.score.innerText);
-
     score += blastCount * 10;
-
-    var scoreIncrease = 1,
-        scoreDiff = score - curScore,
-        interval = settings.scoreChangeTime / scoreDiff;
-
-    if (scoreDiff > settings.scoreChangeTime) {
-        interval = 10;
-        scoreIncrease = scoreDiff / settings.scoreChangeTime * 10;
-    }
-
-    scoreInterval = setInterval(function () {
-        curScore += scoreIncrease;
-        if (curScore >= score) {
-            clearInterval(scoreInterval);
-            Nodes.score.innerText = String(score);
-            return;
-        }
-        Nodes.score.innerText = String(Math.floor(curScore));
-    }, interval)
+    scoreStartTime = Date.now();
+    curScore = parseInt(Nodes.score.innerText);
 }
