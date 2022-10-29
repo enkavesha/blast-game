@@ -3,7 +3,7 @@ var settings = {
         scoreChangeTime: 500,
         zoomOutSpeed: 500,
         zoomInSpeed: 500,
-        dropSpeed: 500,
+        dropSpeed: 300,
         levelNumber: 3,
         supertileActivationNumber: 5,
         fieldblastActivationNumber: 10,

@@ -13,9 +13,12 @@ class Tile {
         this._img = loadedImages['tile' + this._color];
         this._zoomOut = false;
         this._zoomIn = false;
-        this._deltaX = 0;
-        this._deltaY = 0;
         this._booster = false;
+        this._creationTime = Date.now();
+        this._startX = this._x;
+        this._startY = this._y;
+        this._maxX = tileWidth * col + 1 + (tileWidth - this._width) / 2;
+        this._maxY = tileHeight * row + 1 + (tileHeight - this._height) / 2;
 
         this.update = function () {
             if (!this._isVisible) return;
@@ -40,27 +43,20 @@ class Tile {
                 this._x = tileWidth * col + 1 + (tileWidth - this._width) / 2;
                 this._y = tileHeight * row + 1 + (tileHeight - this._height) / 2;
             } else {
-                var deltaX = tileWidth / (settings.dropSpeed / 60),
-                    maxX = tileWidth * col + 1 + (tileWidth - this._width) / 2,
-                    deltaY = tileHeight / (settings.dropSpeed / 60),
-                    maxY = tileHeight * row + 1 + (tileHeight - this._height) / 2;
+                var now = Date.now(),
+                    newX = this._startX + (this._maxX - this._startX) / settings.dropSpeed * (now - this._creationTime),
+                    newY = this._startY + (this._maxY - this._startY) / settings.dropSpeed * (now - this._creationTime);
 
-                if (!this._deltaX) this._deltaX = (maxX - this._x) / (settings.dropSpeed / 60);
-                if (!this._deltaY) this._deltaY = (maxY - this._y) / (settings.dropSpeed / 60);
-
-                var newX = this._x + this._deltaX,
-                    newY = this._y + this._deltaY;
-
-                if (newX < maxX) {
-                    this._x += deltaX;
+                if (newX <= this._maxX) {
+                    this._x = newX;
                 } else {
-                    this._x = maxX;
+                    this._x = this._maxX;
                 }
 
-                if (newY < maxY) {
-                    this._y += deltaY;
+                if (newY <= this._maxY) {
+                    this._y = newY;
                 } else {
-                    this._y = maxY;
+                    this._y = this._maxY;
                 }
             }
             ctx.drawImage(this._img, this._x, this._y, this._width, this._height);
