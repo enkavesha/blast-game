@@ -136,8 +136,13 @@ function clickTile(x, y) {
     createBlastMatrix(true);
 
     if (bombActive) {
-        findBombArea(row, col);
+        setCounters(movesLeft, score, null, shufflesLeft, --bombsLeft);
+        if (!bombsLeft) {
+            Nodes.game.classList.add('no-bombs');
+        }
         bombActive = false;
+        Nodes.bombButton.classList.remove('active');
+        findBombArea(row, col);
     } else if (tiles[row][col]._booster) {
         findSuperArea(row, col);
     } else {

@@ -86,6 +86,10 @@
         font-size: 5vh;
     }
 
+    &.active {
+        background: red;
+    }
+
     .no-shuffles &.shuffle-button,
     .no-bombs &.bomb-button {
         opacity: 0.5;

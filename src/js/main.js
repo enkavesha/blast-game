@@ -203,10 +203,7 @@ function addEventListeners() {
     })
     Nodes.bombButton.addEventListener('click', function () {
         if (controlsDisabled) return;
-        bombActive = true;
-        setCounters(movesLeft, score, null, shufflesLeft, --bombsLeft);
-        if (!bombsLeft) {
-            Nodes.game.classList.add('no-bombs');
-        }
+        bombActive = !bombActive;
+        Nodes.bombButton.classList.toggle('active');
     })
 }
