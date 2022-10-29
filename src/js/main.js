@@ -1,9 +1,9 @@
 var settings = {
         colors: ['#00A676', '#E9E3E6', '#3C91E6', '#393D3F', '#FE6D73'],
         scoreChangeTime: 500,
-        zoomOutSpeed: 500,
-        zoomInSpeed: 500,
+        zoomOutSpeed: 300,
         dropSpeed: 300,
+        animationDelay : 100,
         levelNumber: 3,
         supertileActivationNumber: 5,
         fieldblastActivationNumber: 10,
@@ -98,7 +98,7 @@ var settings = {
     tileHeight,
     blastCount,
     blastMatrix,
-    blastExtremePoints = {x1: 0, x2: 0, y1: 0, y2: 0},
+    blastExtremePoints = {x1: 0, x2: 0, y1: 0, y2: 0, height: 0, width: 0},
     moveExists = false,
     tilesWillDrop = false,
     level = 0,
@@ -153,7 +153,7 @@ function createField() {
     for (row = 0; row < settings.levels[level].rows; row++) {
         if (!tiles[row]) tiles[row] = [];
         for (col = 0; col < settings.levels[level].cols; col++) {
-            generateTile(row, col);
+            tiles[row][col] = new Tile(row, col);
         }
     }
 }

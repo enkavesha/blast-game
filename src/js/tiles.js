@@ -12,7 +12,7 @@ class Tile {
         this._bgColor = settings.colors[this._color];
         this._img = loadedImages['tile' + this._color];
         this._zoomOut = false;
-        this._zoomIn = false;
+        this._zoomStartTime = 0;
         this._booster = false;
         this._creationTime = Date.now();
         this._startX = this._x;
@@ -23,28 +23,23 @@ class Tile {
         this.update = function () {
             if (!this._isVisible) return;
 
+            var now = Date.now();
+
             if (this._zoomOut) {
                 if (this._scale > 0) {
-                    this._scale -= 1 / (settings.zoomOutSpeed / 60);
+                    this._scale = 1 - 1 / settings.zoomOutSpeed * (now - this._zoomStartTime);
                 } else {
                     this._isVisible = false;
-                }
-            } else if (this._zoomIn) {
-                if (this._scale < 1) {
-                    this._scale += 1 / (settings.zoomInSpeed / 60);
-                } else {
-                    this._scale = 1;
                 }
             }
             this._width = (tileWidth - 2) * this._scale;
             this._height = (tileHeight - 2) * this._scale;
 
-            if (this._zoomOut || this._zoomIn) {
+            if (this._zoomOut) {
                 this._x = tileWidth * col + 1 + (tileWidth - this._width) / 2;
                 this._y = tileHeight * row + 1 + (tileHeight - this._height) / 2;
             } else {
-                var now = Date.now(),
-                    newX = this._startX + (this._maxX - this._startX) / settings.dropSpeed * (now - this._creationTime),
+                var newX = this._startX + (this._maxX - this._startX) / settings.dropSpeed * (now - this._creationTime),
                     newY = this._startY + (this._maxY - this._startY) / settings.dropSpeed * (now - this._creationTime);
 
                 if (newX <= this._maxX) {
@@ -91,8 +86,8 @@ class Tile {
         this._booster = value;
     }
 
-    set zoomIn(value) {
-        this._zoomIn = value;
+    set zoomStartTime(value) {
+        this._zoomStartTime = value;
     }
 
     get row() {
@@ -122,10 +117,6 @@ class Tile {
     get y() {
         return this._y;
     }
-}
-
-function generateTile(row, col, color) {
-    tiles[row][col] = new Tile(row, col, color);
 }
 
 function clickTile(x, y) {
@@ -161,7 +152,7 @@ function findArea(row, col) {
     color = tiles[row][col].color;
 
     blastMatrix[row][col] = 1;
-    blastExtremePoints = {x1: col, x2: col, y1: row, y2: row};
+    blastExtremePoints = {x1: col, x2: col, y1: row, y2: row, width: 1, height: 1};
 
     findMatchingNeighbours(row, col, color, blastMatrix);
 }
@@ -190,7 +181,14 @@ function findSuperArea(row, col) {
         }
     } else if (tiles[row][col]._booster === 'All') {
         createBlastMatrix(false);
-        blastExtremePoints = {x1: 0, x2: settings.levels[level].cols - 1, y1: 0, y2: settings.levels[level].rows - 1}
+        blastExtremePoints = {
+            x1: 0,
+            x2: settings.levels[level].cols - 1,
+            y1: 0,
+            y2: settings.levels[level].rows - 1,
+            width: settings.levels[level].cols,
+            height: settings.levels[level].rows
+        }
     }
 }
 
@@ -213,7 +211,7 @@ function findBombArea(row, col) {
             }
         }
     }
-    blastExtremePoints = {x1: x1, x2: x2, y1: y1, y2: y2}
+    blastExtremePoints = {x1: x1, x2: x2, y1: y1, y2: y2, width: x2 - x2, height: y2 - y1}
 }
 
 function createBlastMatrix(isEmpty) {
@@ -251,7 +249,7 @@ function processTiles() {
     updateScore();
     setTimeout(function () {
         dropTiles();
-        dropTimeout = tilesWillDrop ? settings.dropSpeed + 100 : 0;
+        dropTimeout = tilesWillDrop ? settings.dropSpeed + settings.animationDelay : settings.animationDelay;
         tilesWillDrop = false;
 
         setTimeout(function () {
@@ -271,9 +269,9 @@ function processTiles() {
                 } else {
                     controlsDisabled = false;
                 }
-            }, settings.zoomInSpeed + 200)
+            }, settings.dropSpeed)
         }, dropTimeout)
-    }, settings.zoomOutSpeed)
+    }, settings.zoomOutSpeed + settings.animationDelay)
 }
 
 function isMatching(row, col, color, matrix) {
@@ -325,23 +323,22 @@ function updateExtremePoints(row, col) {
     if (blastExtremePoints.y2 < row) {
         blastExtremePoints.y2 = row;
     }
+
+    blastExtremePoints.height = blastExtremePoints.y2 - blastExtremePoints.y1 + 1;
+    blastExtremePoints.width = blastExtremePoints.x2 - blastExtremePoints.x1 + 1;
 }
 
 function checkForSuperTile(row, col) {
-    var blastAreaHeight, blastAreaWidth;
-
     if (blastCount >= settings.fieldblastActivationNumber) {
         blastMatrix[row][col] = 0;
         tiles[row][col]._booster = 'All';
     } else if (blastCount >= settings.supertileActivationNumber) {
         blastMatrix[row][col] = 0;
-        blastAreaWidth = blastExtremePoints.x2 - blastExtremePoints.x1 + 1;
-        blastAreaHeight = blastExtremePoints.y2 - blastExtremePoints.y1 + 1;
-        if (blastAreaWidth > blastAreaHeight) {
+        if (blastExtremePoints.width > blastExtremePoints.height) {
             tiles[row][col]._booster = 'H';
-        } else if (blastAreaWidth < blastAreaHeight) {
+        } else if (blastExtremePoints.width < blastExtremePoints.height) {
             tiles[row][col]._booster = 'V';
-        } else if (blastAreaWidth === blastAreaHeight) {
+        } else if (blastExtremePoints.width === blastExtremePoints.height) {
             tiles[row][col]._booster = Math.round(Math.random()) ? 'V' : 'H';
         }
     }
@@ -369,6 +366,7 @@ function blastArea(matrix, isCompleteBlast) {
         for (col = 0; col < settings.levels[level].cols; col++) {
             if ((isCompleteBlast || matrix[row][col]) && tiles[row] && tiles[row][col]) {
                 tiles[row][col]._zoomOut = true;
+                tiles[row][col]._zoomStartTime = Date.now();
             }
         }
     }
@@ -400,9 +398,7 @@ function generateNewTiles() {
     for (row = 0; row < settings.levels[level].rows; row++) {
         for (col = 0; col < settings.levels[level].cols; col++) {
             if (tiles[row][col]._isVisible) continue;
-            generateTile(row, col);
-            tiles[row][col]._scale = 0.01;
-            tiles[row][col]._zoomIn = true;
+            tiles[row][col] = new Tile(row, col, -1, tileWidth * col + 1, -tileHeight * (blastExtremePoints.height - row + 1));
         }
     }
 }
