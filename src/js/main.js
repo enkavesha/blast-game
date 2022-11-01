@@ -3,7 +3,8 @@ var settings = {
         scoreChangeTime: 500,
         zoomOutSpeed: 300,
         dropSpeed: 300,
-        animationDelay : 100,
+        animationDelay: 100,
+        waitForDropEnd: false,
         levelNumber: 3,
         supertileActivationNumber: 5,
         fieldblastActivationNumber: 10,
@@ -104,7 +105,7 @@ var settings = {
     tileHeight,
     blastCount,
     blastMatrix,
-    blastExtremePoints = {x1: 0, x2: 0, y1: 0, y2: 0, height: 0, width: 0},
+    blastExtremePoints = {x1: -1, x2: -1, y1: -1, y2: -1, height: -1, width: -1},
     moveExists = false,
     tilesWillDrop = false,
     hasSuperTile = false,
@@ -135,7 +136,7 @@ function start() {
 
 function startLevel() {
     if (tiles.length > 0) {
-        blastArea( true);
+        blastArea(true);
     }
     score = 0;
     shufflesLeft = settings.levels[level].shuffles;
@@ -221,7 +222,7 @@ function addEventListeners() {
     })
     Nodes.teleportButton.addEventListener('click', function () {
         if (controlsDisabled) return;
-        if(teleportingTile) tiles[teleportingTile.row][teleportingTile.col].isChecked = false;
+        if (teleportingTile) tiles[teleportingTile.row][teleportingTile.col].isChecked = false;
         teleportingTile = false;
         teleportActive = !teleportActive;
         Nodes.teleportButton.classList.toggle('active');

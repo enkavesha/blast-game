@@ -87,6 +87,10 @@ class Tile {
         this._col = value;
     }
 
+    set isVisible(value) {
+        this._isVisible = value;
+    }
+
     set x(value) {
         this._x = value;
     }
@@ -97,6 +101,10 @@ class Tile {
 
     set booster(value) {
         this._booster = value;
+    }
+
+    set zoomOut(value) {
+        this._zoomOut = value;
     }
 
     set zoomStartTime(value) {
@@ -115,12 +123,12 @@ class Tile {
         return this._col;
     }
 
-    get color() {
-        return this._color;
+    get isVisible() {
+        return this._isVisible;
     }
 
-    get img() {
-        return this._img;
+    get color() {
+        return this._color;
     }
 
     get x() {
@@ -155,7 +163,7 @@ function clickTile(x, y) {
         bombActive = false;
         Nodes.bombButton.classList.remove('active');
         findBombArea(row, col);
-    } else if (tiles[row][col]._booster) {
+    } else if (tiles[row][col].booster) {
         findSuperArea(row, col);
     } else {
         findArea(row, col);
@@ -193,27 +201,27 @@ function findArea(row, col) {
 
 function findSuperArea(row, col) {
     var i;
-    if (tiles[row][col]._booster === 'H') {
+    if (tiles[row][col].booster === 'H') {
         for (i = 0; i < settings.levels[level].cols; i++) {
             if (!blastMatrix[row][i]) {
                 blastMatrix[row][i] = 1;
                 updateExtremePoints(row, i);
-                if (settings.chainSuperTiles && i !== col && tiles[row][i]._booster) {
+                if (settings.chainSuperTiles && i !== col && tiles[row][i].booster) {
                     findSuperArea(row, i);
                 }
             }
         }
-    } else if (tiles[row][col]._booster === 'V') {
+    } else if (tiles[row][col].booster === 'V') {
         for (i = 0; i < settings.levels[level].rows; i++) {
             if (!blastMatrix[i][col]) {
                 blastMatrix[i][col] = 1;
                 updateExtremePoints(i, col);
-                if (settings.chainSuperTiles && i !== row && tiles[i][col]._booster) {
+                if (settings.chainSuperTiles && i !== row && tiles[i][col].booster) {
                     findSuperArea(i, col);
                 }
             }
         }
-    } else if (tiles[row][col]._booster === 'All') {
+    } else if (tiles[row][col].booster === 'All') {
         createBlastMatrix(false);
         blastExtremePoints = {
             x1: 0,
@@ -241,7 +249,7 @@ function findBombArea(row, col) {
                     continue;
                 }
                 blastMatrix[i][j] = 1;
-                if (settings.chainSuperTiles && tiles[i][j]._booster) findSuperArea(i, j);
+                if (settings.chainSuperTiles && tiles[i][j].booster) findSuperArea(i, j);
             }
         }
     }
@@ -254,7 +262,7 @@ function findBombArea(row, col) {
 function teleportTiles(row, col) {
     tiles[row][col].isChecked = true;
     if (!teleportingTile) {
-        teleportingTile = new Tile(row, col, tiles[row][col]._color, null, null, 1, tiles[row][col].booster);
+        teleportingTile = new Tile(row, col, tiles[row][col].color, null, null, 1, tiles[row][col].booster);
     } else {
         if (row === teleportingTile.row && col === teleportingTile.col) return;
 
@@ -303,8 +311,8 @@ function countBlastTiles() {
 }
 
 function processTiles(row, col) {
-    if ((tiles[row][col]._booster && blastCount < settings.levels[level].minBlastCount - 1) ||
-        (!tiles[row][col]._booster && blastCount < settings.levels[level].minBlastCount)) return;
+    if ((tiles[row][col].booster && blastCount < settings.levels[level].minBlastCount - 1) ||
+        (!tiles[row][col].booster && blastCount < settings.levels[level].minBlastCount)) return;
     var dropTimeout;
     controlsDisabled = true;
     blastArea();
@@ -312,7 +320,10 @@ function processTiles(row, col) {
     updateScore();
     setTimeout(function () {
         dropTiles();
-        dropTimeout = tilesWillDrop ? settings.dropSpeed + settings.animationDelay : settings.animationDelay;
+        dropTimeout = settings.animationDelay;
+        if (settings.waitForDropEnd) {
+            dropTimeout = tilesWillDrop ? settings.dropSpeed + settings.animationDelay : settings.animationDelay;
+        }
         tilesWillDrop = false;
 
         setTimeout(function () {
@@ -370,16 +381,16 @@ function findMatchingNeighbours(i, j, color) {
 }
 
 function updateExtremePoints(row, col) {
-    if (blastExtremePoints.x1 > col) {
+    if (blastExtremePoints.x1 < 0 || blastExtremePoints.x1 > col) {
         blastExtremePoints.x1 = col;
     }
-    if (blastExtremePoints.x2 < col) {
+    if (blastExtremePoints.x2 < 0 || blastExtremePoints.x2 < col) {
         blastExtremePoints.x2 = col;
     }
-    if (blastExtremePoints.y1 > row) {
+    if (blastExtremePoints.y1 < 0 || blastExtremePoints.y1 > row) {
         blastExtremePoints.y1 = row;
     }
-    if (blastExtremePoints.y2 < row) {
+    if (blastExtremePoints.y1 < 0 || blastExtremePoints.y2 < row) {
         blastExtremePoints.y2 = row;
     }
 
@@ -390,15 +401,15 @@ function updateExtremePoints(row, col) {
 function checkForSuperTile(row, col) {
     if (blastCount >= settings.fieldblastActivationNumber) {
         blastMatrix[row][col] = 0;
-        tiles[row][col]._booster = 'All';
+        tiles[row][col].booster = 'All';
     } else if (blastCount >= settings.supertileActivationNumber) {
         blastMatrix[row][col] = 0;
         if (blastExtremePoints.width > blastExtremePoints.height) {
-            tiles[row][col]._booster = 'H';
+            tiles[row][col].booster = 'H';
         } else if (blastExtremePoints.width < blastExtremePoints.height) {
-            tiles[row][col]._booster = 'V';
+            tiles[row][col].booster = 'V';
         } else if (blastExtremePoints.width === blastExtremePoints.height) {
-            tiles[row][col]._booster = Math.round(Math.random()) ? 'V' : 'H';
+            tiles[row][col].booster = Math.round(Math.random()) ? 'V' : 'H';
         }
     }
 }
@@ -424,8 +435,8 @@ function blastArea(isCompleteBlast) {
     for (row = 0; row < settings.levels[level].rows; row++) {
         for (col = 0; col < settings.levels[level].cols; col++) {
             if ((isCompleteBlast || blastMatrix[row][col]) && tiles[row] && tiles[row][col]) {
-                tiles[row][col]._zoomOut = true;
-                tiles[row][col]._zoomStartTime = Date.now();
+                tiles[row][col].zoomOut = true;
+                tiles[row][col].zoomStartTime = Date.now();
             }
         }
     }
@@ -435,16 +446,16 @@ function dropTiles() {
     var row, col, prevRow, curRow;
     for (row = settings.levels[level].rows - 1; row > 0; row--) {
         for (col = 0; col < settings.levels[level].cols; col++) {
-            if ((tiles[row] && tiles[row][col] && tiles[row][col]._isVisible)) continue;
+            if ((tiles[row] && tiles[row][col] && tiles[row][col].isVisible)) continue;
             prevRow = row - 1;
             curRow = row;
             while (prevRow > -1) {
-                if (!tiles[prevRow][col]._isVisible) {
+                if (!tiles[prevRow][col].isVisible) {
                     prevRow--;
                     continue;
                 }
-                tiles[curRow][col] = new Tile(curRow, col, tiles[prevRow][col].color, tiles[prevRow][col].x, tiles[prevRow][col].y, 1, tiles[prevRow][col]._booster);
-                tiles[prevRow][col]._isVisible = false;
+                tiles[curRow][col] = new Tile(curRow, col, tiles[prevRow][col].color, tiles[prevRow][col].x, tiles[prevRow][col].y, 1, tiles[prevRow][col].booster);
+                tiles[prevRow][col].isVisible = false;
                 prevRow--;
                 curRow--;
             }
@@ -456,7 +467,7 @@ function generateNewTiles() {
     var row, col;
     for (row = 0; row < settings.levels[level].rows; row++) {
         for (col = 0; col < settings.levels[level].cols; col++) {
-            if (tiles[row][col]._isVisible) continue;
+            if (tiles[row][col].isVisible) continue;
             tiles[row][col] = new Tile(row, col, -1, tileWidth * col + 1, -tileHeight * (blastExtremePoints.height - row + 1));
         }
     }
@@ -479,14 +490,14 @@ function shuffleField() {
             col = i - settings.levels[level].cols * row;
             newRow = Math.floor(id / settings.levels[level].cols);
             newCol = id - settings.levels[level].cols * newRow;
-            shuffledTiles[newRow][newCol] = new Tile(newRow, newCol, tiles[row][col]._color, 0, 0, 1, tiles[row][col]._booster);
+            shuffledTiles[newRow][newCol] = new Tile(newRow, newCol, tiles[row][col].color, 0, 0, 1, tiles[row][col].booster);
             i++;
         }
     }
 
     for (row = 0; row < settings.levels[level].rows; row++) {
         for (col = 0; col < settings.levels[level].cols; col++) {
-            tiles[row][col] = new Tile(row, col, shuffledTiles[row][col]._color, 0, 0, 1, shuffledTiles[row][col]._booster);
+            tiles[row][col] = new Tile(row, col, shuffledTiles[row][col].color, 0, 0, 1, shuffledTiles[row][col].booster);
         }
     }
 
