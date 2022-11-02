@@ -6,7 +6,6 @@
     <title>Blast game</title>
 
     <link rel="stylesheet" href="src-bundle/style.css"/>
-
 </head>
 
 <body>
@@ -16,29 +15,29 @@
                 <div class="progress-bar">
                     <div class="progress-inner" id="progress-inner"></div>
                 </div>
-                Loading...
+                <span class="translate-loading">Loading...</span>
             </div>
         </div>
         <div class="counters">
-            <div class="counter">Moves left: <span id="moves-left"></span></div>
-            <div class="counter">Score: <span id="score"></span></div>
-            <div class="counter">Goal: <span id="goal"></span></div>
+            <div class="counter"><span class="translate-movesleft">Moves left: </span><span id="moves-left"></span></div>
+            <div class="counter"><span class="translate-score">Score: </span><span id="score"></span></div>
+            <div class="counter"><span class="translate-goal">Goal: </span><span id="goal"></span></div>
         </div>
         <div id="field-wrapper" class="field-wrapper">
             <canvas id="field" class="field"></canvas>
             <div class="menu">
-                <div class="title win-title">Good job!</div>
-                <div class="title super-win-title">You've beat the game!</div>
-                <div class="title lose-title">Oops!</div>
+                <div class="title win-title translate-wintitle">Good job!</div>
+                <div class="title super-win-title translate-superwintitle">You've beat the game!</div>
+                <div class="title lose-title translate-losetitle">Oops!</div>
 
-                <div id="next-button" class="button next-button">Next Level</div>
-                <div id="retry-button" class="button retry-button">Retry</div>
-                <div id="restart-button" class="button restart-button">Restart</div>
+                <div id="next-button" class="button next-button translate-nextlevel">Next Level</div>
+                <div id="retry-button" class="button retry-button translate-retry">Retry</div>
+                <div id="restart-button" class="button restart-button translate-restart">Restart</div>
             </div>
         </div>
-        <div id="shuffle-button" class="button shuffle-button">Shuffle <span id="shuffles-left"></span></div>
-        <div id="bomb-button" class="button bomb-button">Bombs <span id="bombs-left"></span></div>
-        <div id="teleport-button" class="button teleport-button">Teleports <span id="teleports-left"></span></div>
+        <div id="shuffle-button" class="button bonus-button shuffle-button">Shuffle <span id="shuffles-left"></span></div>
+        <div id="bomb-button" class="button bonus-button bomb-button">Bombs <span id="bombs-left"></span></div>
+        <div id="teleport-button" class="button bonus-button teleport-button">Teleports <span id="teleports-left"></span></div>
     </div>
 </body>
 
