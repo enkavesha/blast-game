@@ -419,6 +419,7 @@ function checkForSuperTile(row, col) {
         blastMatrix[row][col] = 0;
         tiles[row][col].booster = 'All';
         updateCoins(settings.cost.superSuperTile);
+        superTile = tiles[row][col];
     } else if (blastCount >= settings.supertileActivationNumber) {
         blastMatrix[row][col] = 0;
         if (blastExtremePoints.width > blastExtremePoints.height) {
@@ -429,6 +430,7 @@ function checkForSuperTile(row, col) {
             tiles[row][col].booster = Math.round(Math.random()) ? 'V' : 'H';
         }
         updateCoins(settings.cost.superTile);
+        superTile = tiles[row][col];
     }
 }
 

@@ -2,6 +2,7 @@ function animateGame() {
     animateTiles();
     animateScore();
     animateCoins();
+    bounceCoin();
 
     requestAnimationFrame(animateGame);
 }
@@ -56,4 +57,48 @@ function animateCoins() {
             Nodes.coins.innerText = String(Math.floor(newCoins));
         }
     }
+}
+
+class Coin {
+    constructor(x, y) {
+        this._isVisible = true;
+        this._width = tileWidth / 2;
+        this._height = tileWidth / 2;
+        this._x = x;
+        this._y = y;
+        this._startY = y;
+        this._maxY = y - tileWidth / 2 * 3;
+        this._img = loadedImages['coin'];
+        this._creationTime = Date.now();
+
+        this.update = function () {
+            if (!this._isVisible) return;
+
+            var now = Date.now(),
+                newY = this._startY + (this._maxY - this._startY) / settings.dropSpeed * (now - this._creationTime);
+
+            if (newY >= this._maxY) {
+                this._y = newY;
+            } else {
+                this._y = this._maxY;
+                this._isVisible = false;
+            }
+            ctx.drawImage(this._img, this._x, this._y, this._width, this._height);
+        }
+    }
+
+    set x(value) {
+        this._x = value;
+    }
+
+    set y(value) {
+        this._y = value;
+    }
+}
+
+function bounceCoin() {
+    if (bouncingCoin) bouncingCoin.update();
+    if (!superTile) return;
+    bouncingCoin = new Coin(superTile.x + tileWidth / 4, superTile.y);
+    superTile = false;
 }

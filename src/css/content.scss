@@ -276,13 +276,17 @@
         border: 1px solid #fc539e;
     }
 
-    .win &,
-    .super-win &,
-    .lose &,
     .no-shuffles &.shuffle-button,
     .no-bombs &.bomb-button,
     .no-teleports &.teleport-button, {
         opacity: 0.5;
+        pointer-events: none;
+    }
+
+    .paused &,
+    .win &,
+    .super-win &,
+    .lose &{
         pointer-events: none;
     }
 
