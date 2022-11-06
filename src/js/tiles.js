@@ -12,6 +12,8 @@ class Tile {
         this._img = loadedImages['tile' + this._color];
         this._zoomOut = false;
         this._zoomStartTime = 0;
+        this._superBlast = false;
+        this._superBlastLiveTime = 1;
         this._booster = false;
         this._creationTime = Date.now();
         this._startX = this._x;
@@ -32,6 +34,13 @@ class Tile {
             if (this._zoomOut) {
                 if (this._scale > 0) {
                     this._scale = 1 - 1 / settings.zoomOutSpeed * (now - this._zoomStartTime);
+                } else {
+                    this._isVisible = false;
+                }
+            }
+            if (this._superBlast) {
+                if (this._superBlastLiveTime > 0) {
+                    this._superBlastLiveTime = 1 - 1 / settings.zoomOutSpeed * (now - this._zoomStartTime);
                 } else {
                     this._isVisible = false;
                 }
@@ -68,9 +77,10 @@ class Tile {
                     }
                 }
             }
-            ctx.drawImage(this._img, this._x, this._y, this._width, this._height);
             if (this._booster) {
-                ctx.drawImage(loadedImages['star' + this._booster], this._x, this._y, this._width, this._height);
+                ctx.drawImage(loadedImages['super' + this._booster], this._x - 1, this._y - 1, this._width + 2, this._height + 2);
+            } else {
+                ctx.drawImage(this._img, this._x, this._y, this._width, this._height);
             }
             if (this._isChecked) {
                 ctx.drawImage(loadedImages['checked'], this._x, this._y, this._width, this._height);
@@ -109,6 +119,10 @@ class Tile {
 
     set zoomStartTime(value) {
         this._zoomStartTime = value;
+    }
+
+    set superBlast(value) {
+        this._superBlast = value;
     }
 
     set isChecked(value) {
@@ -171,7 +185,7 @@ function clickTile(x, y) {
         Nodes.bombButton.classList.remove('active');
         findBombArea(row, col);
     } else if (tiles[row][col].booster) {
-        findSuperArea(row, col);
+        findSuperArea(row, col, true);
     } else {
         findArea(row, col);
         countBlastTiles();
@@ -206,15 +220,16 @@ function findArea(row, col) {
     }
 }
 
-function findSuperArea(row, col) {
-    var i;
+function findSuperArea(row, col, forBlast) {
+    var i, j;
     if (tiles[row][col].booster === 'H') {
         for (i = 0; i < settings.levels[level].cols; i++) {
             if (!blastMatrix[row][i]) {
                 blastMatrix[row][i] = 1;
+                if (forBlast && !tiles[row][i].booster) tiles[row][i].booster = 'H';
                 updateExtremePoints(row, i);
                 if (settings.chainSuperTiles && i !== col && tiles[row][i].booster) {
-                    findSuperArea(row, i);
+                    findSuperArea(row, i, forBlast);
                 }
             }
         }
@@ -222,14 +237,20 @@ function findSuperArea(row, col) {
         for (i = 0; i < settings.levels[level].rows; i++) {
             if (!blastMatrix[i][col]) {
                 blastMatrix[i][col] = 1;
+                if (forBlast && !tiles[i][col].booster) tiles[i][col].booster = 'V';
                 updateExtremePoints(i, col);
                 if (settings.chainSuperTiles && i !== row && tiles[i][col].booster) {
-                    findSuperArea(i, col);
+                    findSuperArea(i, col, forBlast);
                 }
             }
         }
     } else if (tiles[row][col].booster === 'All') {
         createBlastMatrix(false);
+        for (i = 0; i < settings.levels[level].rows; i++) {
+            for (j = 0; j < settings.levels[level].cols; j++) {
+                tiles[i][j].booster = 'All';
+            }
+        }
         blastExtremePoints = {
             x1: 0,
             x2: settings.levels[level].cols - 1,
@@ -267,6 +288,7 @@ function findBombArea(row, col) {
 }
 
 function teleportTiles(row, col) {
+    if (tiles[row][col].booster) return;
     tiles[row][col].isChecked = true;
     if (!teleportingTile) {
         teleportingTile = new Tile(row, col, tiles[row][col].color, null, null, 1, tiles[row][col].booster);
@@ -366,6 +388,7 @@ function processTiles(row, col) {
 
 function isMatching(row, col, color) {
     return (col >= 0 && col < settings.levels[level].cols && row >= 0 && row < settings.levels[level].rows) &&
+        !tiles[row][col].booster &&
         tiles[row][col].color === color && !blastMatrix[row][col];
 }
 
@@ -418,7 +441,7 @@ function checkForSuperTile(row, col) {
     if (blastCount >= settings.fieldblastActivationNumber) {
         blastMatrix[row][col] = 0;
         tiles[row][col].booster = 'All';
-        updateCoins(settings.cost.superSuperTile);
+        updateCoins(settings.cost.fieldblastTile);
         superTile = tiles[row][col];
     } else if (blastCount >= settings.supertileActivationNumber) {
         blastMatrix[row][col] = 0;
@@ -455,8 +478,13 @@ function blastArea(isCompleteBlast) {
     for (row = 0; row < settings.levels[level].rows; row++) {
         for (col = 0; col < settings.levels[level].cols; col++) {
             if ((isCompleteBlast || blastMatrix[row][col]) && tiles[row] && tiles[row][col]) {
-                tiles[row][col].zoomOut = true;
-                tiles[row][col].zoomStartTime = Date.now();
+                if (!tiles[row][col].booster) {
+                    tiles[row][col].zoomOut = true;
+                    tiles[row][col].zoomStartTime = Date.now();
+                } else {
+                    tiles[row][col].superBlast = 1;
+                    tiles[row][col].zoomStartTime = Date.now();
+                }
             }
         }
     }
