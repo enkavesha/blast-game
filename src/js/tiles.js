@@ -161,8 +161,11 @@ function clickTile(x, y) {
         return;
     } else if (bombActive) {
         setCounters(movesLeft, score, shufflesLeft, --bombsLeft);
-        if (!bombsLeft) {
+        if (!settings.bonusForCoins && !bombsLeft) {
             Nodes.game.classList.add('no-bombs');
+        }
+        if (settings.bonusForCoins) {
+            updateCoins(-settings.cost.bombs);
         }
         bombActive = false;
         Nodes.bombButton.classList.remove('active');
@@ -281,8 +284,12 @@ function teleportTiles(row, col) {
 
         setCounters(movesLeft, score, shufflesLeft, bombsLeft, --teleportsLeft);
 
-        if (!teleportsLeft) {
+        if (!settings.bonusForCoins && !teleportsLeft) {
             Nodes.game.classList.add('no-teleports');
+        }
+
+        if (settings.bonusForCoins) {
+            updateCoins(-settings.cost.teleports);
         }
         Nodes.teleportButton.classList.remove('active');
     }
@@ -322,6 +329,7 @@ function processTiles(row, col) {
     blastArea();
     setCounters(--movesLeft, score);
     updateScore();
+    // updateCoins(10);
     setTimeout(function () {
         dropTiles();
         dropTimeout = settings.animationDelay;
@@ -410,6 +418,7 @@ function checkForSuperTile(row, col) {
     if (blastCount >= settings.fieldblastActivationNumber) {
         blastMatrix[row][col] = 0;
         tiles[row][col].booster = 'All';
+        updateCoins(settings.cost.superSuperTile);
     } else if (blastCount >= settings.supertileActivationNumber) {
         blastMatrix[row][col] = 0;
         if (blastExtremePoints.width > blastExtremePoints.height) {
@@ -419,6 +428,7 @@ function checkForSuperTile(row, col) {
         } else if (blastExtremePoints.width === blastExtremePoints.height) {
             tiles[row][col].booster = Math.round(Math.random()) ? 'V' : 'H';
         }
+        updateCoins(settings.cost.superTile);
     }
 }
 
@@ -489,11 +499,14 @@ function shuffleField(isAuto) {
             return;
         }
         autoshufflesLeft--;
-    } else{
+    } else {
+        if (settings.bonusForCoins) {
+            updateCoins(-settings.cost.shuffles);
+        }
         setCounters(movesLeft, score, --shufflesLeft);
     }
 
-    if (!shufflesLeft) {
+    if (!settings.bonusForCoins && !shufflesLeft) {
         Nodes.game.classList.add('no-shuffles');
     }
 

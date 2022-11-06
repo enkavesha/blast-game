@@ -309,9 +309,14 @@
         height: 80%;
         aspect-ratio: 1/1;
         margin-left: 1vw;
+        display: none;
 
         .landscape & {
             margin-left: 1vh;
+        }
+
+        .use-coins & {
+            display: block;
         }
     }
 

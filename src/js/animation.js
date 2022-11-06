@@ -1,6 +1,7 @@
 function animateGame() {
     animateTiles();
     animateScore();
+    animateCoins();
 
     requestAnimationFrame(animateGame);
 }
@@ -32,5 +33,27 @@ function animateScore() {
     } else {
         Nodes.score.innerText = String(Math.floor(newScore));
         Nodes.gameProgress.style.width = progress > 100 ? 100 + '%' : progress + '%';
+    }
+}
+
+function animateCoins() {
+    var now, timeDiff, newCoins, coinsDiff;
+
+    now = Date.now();
+    timeDiff = now - coinsStartTime;
+    coinsDiff = coins - curCoins;
+    newCoins = curCoins + coinsDiff / settings.scoreChangeTime * timeDiff;
+    if (coinsDiff > 0) {
+        if (newCoins >= coins) {
+            Nodes.coins.innerText = String(coins);
+        } else {
+            Nodes.coins.innerText = String(Math.floor(newCoins));
+        }
+    } else {
+        if (newCoins <= coins) {
+            Nodes.coins.innerText = String(coins);
+        } else {
+            Nodes.coins.innerText = String(Math.floor(newCoins));
+        }
     }
 }

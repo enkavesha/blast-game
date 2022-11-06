@@ -1,5 +1,4 @@
 var settings = {
-        colors: ['#00A676', '#E9E3E6', '#3C91E6', '#393D3F', '#FE6D73'],
         scoreChangeTime: 500,
         zoomOutSpeed: 300,
         dropSpeed: 300,
@@ -8,10 +7,18 @@ var settings = {
         levelNumber: 3,
         supertileActivationNumber: 5,
         fieldblastActivationNumber: 10,
+        tilesScoreMultiplier: 10,
         autoshuffleNumber: 2,
         chainSuperTiles: true,
-        languages: window.navigator.languages,
-        locale: 'en',
+        startCoins: 0,
+        bonusForCoins: true,
+        cost: {
+            shuffles: 10,
+            bombs: 15,
+            teleports: 5,
+            superTile: 5,
+            superSuperTile: 10,
+        },
         levels: {
             0: {
                 id: 0,
@@ -22,7 +29,7 @@ var settings = {
                 shuffles: 1,
                 bombs: 1,
                 bombRadius: 1,
-                teleports: 100,
+                teleports: 1,
                 get colorNumber() {
                     return Math.floor(4 + this.id / 2)
                 },
@@ -64,7 +71,9 @@ var settings = {
                     return 500 + this.id * 50
                 },
             },
-        }
+        },
+        languages: window.navigator.languages,
+        locale: 'en',
     },
 
     Nodes = {
@@ -74,6 +83,7 @@ var settings = {
         fieldContainer: document.getElementById('field-container'),
         field: document.getElementById('field'),
         score: document.getElementById('score'),
+        coins: document.getElementById('coins'),
         level: document.getElementById('level'),
         movesLeft: document.getElementById('moves-left'),
         shuffles: document.getElementById('shuffles-left'),
@@ -117,6 +127,9 @@ var settings = {
     hasSuperTile = false,
     level = 0,
     score = 0,
+    coins = settings.startCoins,
+    curCoins = 0,
+    coinsStartTime = 0,
     curScore = 0,
     scoreStartTime = 0,
     movesLeft,
@@ -131,6 +144,13 @@ var settings = {
 
 function start() {
     chooseLocale();
+    if (settings.bonusForCoins) {
+        Nodes.game.classList.add('use-coins');
+        Nodes.shuffles.innerText = settings.cost.shuffles;
+        Nodes.bombs.innerText = settings.cost.bombs;
+        Nodes.teleports.innerText = settings.cost.teleports;
+    }
+    Nodes.coins.innerText = String(coins);
     loadImages(images, function () {
         addEventListeners();
         startLevel();
@@ -155,10 +175,10 @@ function startLevel() {
     bombsLeft = settings.levels[level].bombs;
     teleportsLeft = settings.levels[level].teleports;
     createField();
-    setCounters();
     Nodes.game.classList.remove('win', 'lose', 'super-win', 'no-shuffles', 'no-bombs', 'no-teleports');
     Nodes.game.classList.add('progress-reset');
     Nodes.gameProgress.style.width = '';
+    setCounters();
 
     setTimeout(function () {
         Nodes.game.classList.remove('progress-reset');
