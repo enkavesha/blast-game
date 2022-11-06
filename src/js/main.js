@@ -8,6 +8,7 @@ var settings = {
         levelNumber: 3,
         supertileActivationNumber: 5,
         fieldblastActivationNumber: 10,
+        autoshuffleNumber: 2,
         chainSuperTiles: true,
         languages: window.navigator.languages,
         locale: 'en',
@@ -119,6 +120,7 @@ var settings = {
     scoreStartTime = 0,
     movesLeft,
     shufflesLeft,
+    autoshufflesLeft,
     bombsLeft,
     bombActive = false,
     teleportsLeft,
@@ -148,6 +150,7 @@ function startLevel() {
     curScore = 0;
     Nodes.level.innerText = String(level + 1);
     shufflesLeft = settings.levels[level].shuffles;
+    autoshufflesLeft = settings.autoshuffleNumber;
     bombsLeft = settings.levels[level].bombs;
     teleportsLeft = settings.levels[level].teleports;
     createField();
@@ -243,11 +246,6 @@ function addEventListeners() {
     Nodes.shuffleButton.addEventListener('click', function () {
         if (controlsDisabled) return;
         shuffleField();
-        findMove();
-        if (!moveExists) {
-            Nodes.game.classList.add('lose');
-            controlsDisabled = true;
-        }
         bombActive = false;
         Nodes.bombButton.classList.remove('active');
         teleportingTile = false;

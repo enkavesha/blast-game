@@ -346,6 +346,10 @@ function processTiles(row, col) {
                     controlsDisabled = true;
                 } else {
                     controlsDisabled = false;
+                    findMove();
+                    if (!moveExists) {
+                        shuffleField(true);
+                    }
                 }
             }, settings.dropSpeed)
         }, dropTimeout)
@@ -477,7 +481,22 @@ function generateNewTiles() {
     }
 }
 
-function shuffleField() {
+function shuffleField(isAuto) {
+    if (isAuto) {
+        if (autoshufflesLeft <= 0) {
+            Nodes.game.classList.add('lose');
+            controlsDisabled = true;
+            return;
+        }
+        autoshufflesLeft--;
+    } else{
+        setCounters(movesLeft, score, --shufflesLeft);
+    }
+
+    if (!shufflesLeft) {
+        Nodes.game.classList.add('no-shuffles');
+    }
+
     var id, i = 0, row, col, newRow, newCol, length, idArray = [], shuffledTiles = [];
 
     length = settings.levels[level].rows * settings.levels[level].cols;
@@ -494,20 +513,30 @@ function shuffleField() {
             col = i - settings.levels[level].cols * row;
             newRow = Math.floor(id / settings.levels[level].cols);
             newCol = id - settings.levels[level].cols * newRow;
-            shuffledTiles[newRow][newCol] = new Tile(newRow, newCol, tiles[row][col].color, 0, 0, 1, tiles[row][col].booster);
+            shuffledTiles[newRow][newCol] = new Tile(newRow, newCol, tiles[row][col].color, tiles[row][col].x, tiles[row][col].y, 1, tiles[row][col].booster);
             i++;
         }
     }
 
     for (row = 0; row < settings.levels[level].rows; row++) {
         for (col = 0; col < settings.levels[level].cols; col++) {
-            tiles[row][col] = new Tile(row, col, shuffledTiles[row][col].color, 0, 0, 1, shuffledTiles[row][col].booster);
+            tiles[row][col] = new Tile(row, col, shuffledTiles[row][col].color, shuffledTiles[row][col].x, shuffledTiles[row][col].y, 1, shuffledTiles[row][col].booster);
         }
     }
 
-    setCounters(movesLeft, score, --shufflesLeft);
+    findMove();
 
-    if (!shufflesLeft) {
-        Nodes.game.classList.add('no-shuffles');
+    if (!moveExists) {
+        if (autoshufflesLeft > 0) {
+            setTimeout(function () {
+                shuffleField(true);
+            }, settings.dropSpeed)
+        } else {
+            controlsDisabled = true;
+
+            setTimeout(function () {
+                Nodes.game.classList.add('lose');
+            }, settings.dropSpeed)
+        }
     }
 }
