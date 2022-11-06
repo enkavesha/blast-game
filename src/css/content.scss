@@ -196,9 +196,51 @@
 .pause-button {
     width: 32%;
     aspect-ratio: 1/1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
 
-    .pause-img {
+    &:before {
+        content: '';
+        display: block;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        box-shadow: #fff 0 0 10px 2px;
+        border-radius: 5vw;
+        opacity: 0;
+
+        .landscape & {
+            border-radius: 5vh;
+        }
+
+        .paused & {
+            animation: fade-pulse 1.5s infinite;
+        }
+    }
+
+    .pause-icon {
         width: 50%;
+        display: none;
+    }
+
+    .visible & {
+        .pause-img {
+            display: block;
+        }
+    }
+
+    .paused & {
+        .pause-img {
+            display: none;
+        }
+
+        .play-img {
+            display: block;
+        }
     }
 }
 
@@ -365,6 +407,7 @@
         font-size: 5vh;
     }
 
+    .paused &,
     .win &,
     .lose &,
     .super-win & {
@@ -377,6 +420,7 @@
         display: none;
     }
 
+    .paused & .pause-title,
     .win & .win-title,
     .super-win & .super-win-title,
     .lose & .lose-title {
@@ -409,5 +453,14 @@
     }
     50% {
         transform: scale(1.1);
+    }
+}
+
+@keyframes fade-pulse {
+    0%, 100% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
     }
 }

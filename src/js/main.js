@@ -85,6 +85,7 @@ var settings = {
         shuffleButton: document.getElementById('shuffle-button'),
         bombButton: document.getElementById('bomb-button'),
         teleportButton: document.getElementById('teleport-button'),
+        pauseButton: document.getElementById('pause-button'),
     },
 
     images = {
@@ -230,6 +231,11 @@ function addEventListeners() {
     Nodes.field.addEventListener('click', function (e) {
         if (controlsDisabled) return;
         clickTile(e.clientX - ctxBounds.left, e.clientY - ctxBounds.top);
+    })
+
+    Nodes.pauseButton.addEventListener('click', function () {
+        controlsDisabled = !controlsDisabled;
+        Nodes.game.classList.toggle('paused');
     })
 
     Nodes.nextButton.addEventListener('click', function () {

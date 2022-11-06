@@ -9,6 +9,10 @@ var localization = {
         en: 'Score: ',
         ru: 'Очки: '
     },
+    pausetitle: {
+        en: 'Paused',
+        ru: 'Пауза'
+    },
     wintitle: {
         en: 'Good job!',
         ru: 'Отличная работа!'
