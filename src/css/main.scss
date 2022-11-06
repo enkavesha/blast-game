@@ -5,7 +5,7 @@ body {
     height: 100%;
     margin: 0;
     padding: 0;
-    background-color: #000;
+    background: linear-gradient(to top, #103d79 0%, #092140 100%);
     font-family: 'Marvin', sans-serif;
     user-select: none;
 
@@ -18,16 +18,43 @@ body {
     width: 100%;
     height: 100%;
     margin: 0 auto;
-    padding: 20px;
+    padding: 10px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-around;
     align-items: center;
 
     @supports (padding: unquote('max(1px,2px)')) {
-        padding-top: unquote('max(20px, env(safe-area-inset-top))');
-        padding-left: unquote('max(20px, env(safe-area-inset-left))');
-        padding-right: unquote('max(20px, env(safe-area-inset-right))');
-        padding-bottom: unquote('max(20px, env(safe-area-inset-bottom))');
+        padding-top: unquote('max(10px, env(safe-area-inset-top))');
+        padding-left: unquote('max(10px, env(safe-area-inset-left))');
+        padding-right: unquote('max(10px, env(safe-area-inset-right))');
+        padding-bottom: unquote('max(10px, env(safe-area-inset-bottom))');
+    }
+
+    &.landscape {
+        flex-wrap: wrap;
+        align-content: space-evenly;
+
+        &:before,
+        &:after {
+            content: '';
+            display: block;
+            height: 100%;
+        }
+
+        &:before {
+            order: -100;
+        }
+
+        &:after {
+            order: 100;
+        }
+    }
+
+    &.tablet.landscape {
+        &:before,
+        &:after {
+            display: none;
+        }
     }
 }

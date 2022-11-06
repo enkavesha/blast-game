@@ -1,8 +1,7 @@
-function setCounters(moves, score, goal, shuffles, bombs, teleports) {
+function setCounters(moves, score, shuffles, bombs, teleports) {
     movesLeft = moves >= 0 ? moves : settings.levels[level].moves;
     Nodes.movesLeft.innerText = movesLeft;
     Nodes.score.innerText = score || '0';
-    Nodes.goal.innerText = goal || settings.levels[level].goal;
     Nodes.shuffles.innerText = shuffles ? shuffles : shufflesLeft;
     Nodes.bombs.innerText = bombs ? bombs : bombsLeft;
     Nodes.teleports.innerText = teleports ? teleports : teleportsLeft;

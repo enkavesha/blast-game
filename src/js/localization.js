@@ -5,17 +5,9 @@ var localization = {
         en: 'Loading...',
         ru: 'Загрузка...'
     },
-    movesleft: {
-        en: 'Moves left: ',
-        ru: 'Ходов осталось: '
-    },
     score: {
         en: 'Score: ',
         ru: 'Очки: '
-    },
-    goal: {
-        en: 'Goal: ',
-        ru: 'Цель: '
     },
     wintitle: {
         en: 'Good job!',

@@ -12,32 +12,95 @@
     <div id="game" class="game loading">
         <div class="loading-screen">
             <div class="progress-wrapper">
+                <span class="progress-title translate-loading"></span>
                 <div class="progress-bar">
-                    <div class="progress-inner" id="progress-inner"></div>
+                    <div class="progress-inner" id="loading-progress"></div>
                 </div>
-                <span class="translate-loading">Loading...</span>
             </div>
         </div>
-        <div class="counters">
-            <div class="counter"><span class="translate-movesleft">Moves left: </span><span id="moves-left"></span></div>
-            <div class="counter"><span class="translate-score">Score: </span><span id="score"></span></div>
-            <div class="counter"><span class="translate-goal">Goal: </span><span id="goal"></span></div>
-        </div>
-        <div id="field-wrapper" class="field-wrapper">
-            <canvas id="field" class="field"></canvas>
-            <div class="menu">
-                <div class="title win-title translate-wintitle">Good job!</div>
-                <div class="title super-win-title translate-superwintitle">You've beat the game!</div>
-                <div class="title lose-title translate-losetitle">Oops!</div>
 
-                <div id="next-button" class="button next-button translate-nextlevel">Next Level</div>
-                <div id="retry-button" class="button retry-button translate-retry">Retry</div>
-                <div id="restart-button" class="button restart-button translate-restart">Restart</div>
+        <div class="sidebar">
+            <div class="level-counters double-border-outer">
+                <div class="inner-wrapper double-border-inner">
+                    <div class="counter-moves">
+                        <span class="value moves-value" id="moves-left"></span>
+                    </div>
+                    <div class="counter-score">
+                        <div class="value score-text translate-score">Score:</div>
+                        <div class="value score-value" id="score"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="game-state">
+                <div class="state-wrapper">
+                    <div class="bubble bubble-purple total-score">
+                        <div class="state-icon coin"></div>
+                        <div class="value">666</div>
+                        <div class="flare"></div>
+                    </div>
+                    <div class="bubble level">
+                        <div class="state-icon">
+                            <img class="avatar" src="data:image/jpeg;base64,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">
+                        </div>
+                        <div id="level" class="value"></div>
+                        <div class="flare"></div>
+                    </div>
+                </div>
+                <div class="pause-button double-border-outer" id="pause-button">
+                    <div class="inner-wrapper double-border-inner">
+                        <img class="pause-img" src="data:image/png;base64,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">
+                    </div>
+                </div>
+            </div>
+            <div class="bonus-wrapper">
+                <div id="shuffle-button" class="bonus-button shuffle-button">
+                    <div class="icon-holder">
+                        <img class="icon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAQAAABpN6lAAAAAAXNSR0IArs4c6QAABMNJREFUeNrtnP9LnVUcx1869aq4kdMlqVNWOCtq0Wq1ECuCgoH0ZfVbbRGErE3HyvphrR8GNrDWaESsGKOIRkE0+rKtX2o/GU6N1MWq5VTmIKYVq+ldtvzyiTgo7nrPufd673O5z3PO6/UXfD7wPM85n3PeDw6Hw+FwOBwOh8PhcDgcviPEdroIE6aTZkJYRgW9yDx7qMQi8ulFIhykCmtoRhCbW9CF2N2CMKLxHKuwgHHE7hZ0qmLtfRCaEbtbEKLH9hasZNC1YABBbH4duha4FrgWpK4Fan/dSRhJyEkuMkQ7B3meO8gmVZTxKLv5glMMcwmJZfJfhAr6kKT9g8M8mGQbqmjhW6aRlDrISgyEVPkpcpgXKGQxrOVjJhFP7CWElu1Iih1lBzkkQg3HEE9tMu6vPbCPe4iPQl7lH8RjO4zbS0+coY0lxKKWH5A0OJ7uBihPsAITG/kLSYuXjI+Ah/YbvsOvIGmzw7i/9tQLrGEhWbyBpNFtaAnRi3jqCDVE8haSRnvIi3nQ4KnnqGQ+LUgaHaQSzOTRxElPX4fd5DPL40wj3uv9hiiHUtaxhSP8jcT0PWbZicT0J16jgVUsxURVpsyGimlhFMHsZhR5/IgYPEodKPxRvqKIfUwhBv+kAsW9zCBR/Zl68GP5inouIAaPM8snSBQPke/n8gEqOI0YbEBxE1MLls47wO/lA5QYP6pnyEXxQUT5jcEZi1/HEKJ1K4oappE5dyVyPyCzywe4hcuIxiFyUBxHUH4YvKOxZxCtT6HYMPdYFBE/XX4oH+Arw8pckc0AwjTrSYRxf5QP1Yb14VoUexAOkBjj/igfoA3R+DaKNYxRSmJ0+qV8KNZO9S+Si2JTsC9J6YceDyRzP8Av5UO1duO7n8VTEdGC7zP5ouTXSFTPkgwhmjhJmDAdbCOPDGYzorEcK1iuPe56AktoR6L6JpbQikS1C0vYgET1XwqwgmuY1q4FLEE3I9qHJRxEojpAFlawCdFYZ0dmqFQ7Lj9kS2ZItxaY4NogZ4ZKaEDxIqKxNcjb4TY+Q1GuXRCPUxbUzND1XGaCZSiOIhrfCepITA1Fn0bxGKJxmrogDkUb54YViiX0G06LioKWGbpt3kT4LhTPIloPB+tgpJxhZMGpT4jziNadwckMldAXcad8dfQVYTAPRyuj3P74CEUW3cYWtPj/ePw+RqK+529FsZ4pxOD7FPi3BUvZr935nyALxeuI0X7u92MLlvMSvyFxnAjnq0fE6DHq/dGCXFZwN1v5nIk4MgTFKG5mDInpL+zlYW5gmQctMGWGPLOTQmZ5hJnMuiipMkNeOhCx7d2FmPRzZiiao6wmkr1INIORGbra89SykKzI++JBywzN2k81Ol5mBlEGMTP0v99QhoknCSNpcSz9DZhiN9nEopZTwcwMfcc64qOAVq4EKzP0O1vIJhFu5EtmgpEZOstzFLIYbudTJv2cGRrhXR4im2Qoo4VupvySGbrCKGdo5wCN3El2CrdWG9nDEU7zazz7hszZE2rwww8U/Ikr35Xvyre1/AyaBqaMYGWG3O/0EiWImSGvCNv66ptl3O7yfZUZcj9WNmFHZsiALZkhLbZkhhwOh8PhcDgcDofD4XBkBv8BBaRKSWSQp6AAAAAASUVORK5CYII=">
+                    </div>
+                    <div class="bonus-counter">
+                        <span class="value" id="shuffles-left"></span>
+                        <div class="bonus-coin coin"></div>
+                    </div>
+                </div>
+                <div id="bomb-button" class="bonus-button bomb-button">
+                    <div class="icon-holder">
+                        <img class="icon" src="data:image/png;base64,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">
+                    </div>
+                    <div class="bonus-counter">
+                        <span class="value" id="bombs-left"></span>
+                        <div class="bonus-coin coin"></div>
+                    </div>
+                </div>
+                <div id="teleport-button" class="bonus-button teleport-button">
+                    <div class="icon-holder">
+                        <img class="icon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAQAAABpN6lAAAAAAXNSR0IArs4c6QAAAfpJREFUeNrtm0FugzAURN8K9w5ApJ6vJMdMyKLQAwSpV2hh7yqq0khBhC4CdvznzQX+jGLHhgEhhBBCCCGEEEKIp8Gx48jAQM0WhzFyWjxXNRQY4uXP/lUdG8ywxeMtR3DE245gwE/ok1cM0ONtR1D/mrW7ELZ42xE4GusRlHSK4ITHW94OFYEiUASKQBEoAkXw6AgcO2oGfIKaPx2S8xHFqMtFUHIHl7j9s1ock+yiGHFpVUxyjGLApbVnkj6KAZdWbz2ALy2BSbZRDLi03pjE0UYx4pJqyLhDnngEHQUzZFQcEt0Ok35Qavw+KPuyL/uyL/uyL/uW7Jt+Pf5Ca9l+JBWZkF3dY3j7xairm7MeQ+itb8N4C2pwrEUfn/2zKtainv7xh7PvOXAh4bL0veNHz1o4mvjse75Zj/wmgneKAD/+AEvgiqPiwMDAnjey8PY9FQkzb/895Q+X5u13KX+0ZP7iKfuyL/uyL/uyL/tW7G/ooigzPFj/fXZZJmr/opYcbJek1BWmYpI6igGX1sF6VVZdYS0B413hyvrfYKaDkMmjcM+eikyXId0HFYEiUASKQBEoAkXw8NfjJUkzH0GTckFCFZkIS1Ijwm+HPQYoOUXRE7xL+lXZeRIvSwdnQ2erJzimGHV1c4xx29UVQgghhBBCCCGEeBJ+AGD1LZrNU7+AAAAAAElFTkSuQmCC">
+                    </div>
+                    <div class="bonus-counter">
+                        <span class="value" id="teleports-left"></span>
+                        <div class="bonus-coin coin"></div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div id="shuffle-button" class="button bonus-button shuffle-button">Shuffle <span id="shuffles-left"></span></div>
-        <div id="bomb-button" class="button bonus-button bomb-button">Bombs <span id="bombs-left"></span></div>
-        <div id="teleport-button" class="button bonus-button teleport-button">Teleports <span id="teleports-left"></span></div>
+        <div class="field-wrapper double-border-outer">
+            <div class="inner-wrapper double-border-inner">
+                <div class="field-container" id="field-container">
+                    <canvas id="field" class="field"></canvas>
+                </div>
+                <div class="menu">
+                    <div class="title win-title translate-wintitle">Good job!</div>
+                    <div class="title super-win-title translate-superwintitle">You've beat the game!</div>
+                    <div class="title lose-title translate-losetitle">Oops!</div>
+
+                    <div id="next-button" class="bubble next-button translate-nextlevel">Next Level</div>
+                    <div id="retry-button" class="bubble retry-button translate-retry">Retry</div>
+                    <div id="restart-button" class="bubble restart-button translate-restart">Restart</div>
+                </div>
+            </div>
+        </div>
+        <div class="progress-bar game-progress-bar">
+            <div class="progress-inner" id="game-progress"></div>
+        </div>
     </div>
 </body>
 

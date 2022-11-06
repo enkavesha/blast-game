@@ -142,6 +142,10 @@ class Tile {
     get booster() {
         return this._booster;
     }
+
+    get isChecked() {
+        return this._isChecked;
+    }
 }
 
 function clickTile(x, y) {
@@ -156,7 +160,7 @@ function clickTile(x, y) {
         teleportTiles(row, col);
         return;
     } else if (bombActive) {
-        setCounters(movesLeft, score, null, shufflesLeft, --bombsLeft);
+        setCounters(movesLeft, score, shufflesLeft, --bombsLeft);
         if (!bombsLeft) {
             Nodes.game.classList.add('no-bombs');
         }
@@ -275,7 +279,7 @@ function teleportTiles(row, col) {
         teleportingTile = false;
         teleportActive = false;
 
-        setCounters(movesLeft, score, null, shufflesLeft, bombsLeft, --teleportsLeft);
+        setCounters(movesLeft, score, shufflesLeft, bombsLeft, --teleportsLeft);
 
         if (!teleportsLeft) {
             Nodes.game.classList.add('no-teleports');
@@ -501,7 +505,7 @@ function shuffleField() {
         }
     }
 
-    setCounters(movesLeft, score, null, --shufflesLeft);
+    setCounters(movesLeft, score, --shufflesLeft);
 
     if (!shufflesLeft) {
         Nodes.game.classList.add('no-shuffles');
