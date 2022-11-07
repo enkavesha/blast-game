@@ -1,183 +1,9 @@
-class Tile {
-    constructor(row, col, color, x, y, scale, booster) {
-        this._row = row;
-        this._col = col;
-        this._isVisible = true;
-        this._scale = scale || 1;
-        this._width = (tileWidth - 2) * this._scale;
-        this._height = (tileHeight - 2) * this._scale;
-        this._x = x || tileWidth * this._col + 1 + (tileWidth - this._width) / 2;
-        this._y = y || tileHeight * this._row + 1 + (tileHeight - this._height) / 2;
-        this._color = color > -1 ? color : Math.floor(Math.random() * settings.levels[level].colorNumber);
-        this._img = loadedImages['tile' + this._color];
-        this._zoomOut = false;
-        this._zoomStartTime = 0;
-        this._superBlast = false;
-        this._superBlastLiveTime = 1;
-        this._booster = false;
-        this._bomb = false;
-        this._creationTime = Date.now();
-        this._startX = this._x;
-        this._startY = this._y;
-        this._maxX = tileWidth * col + 1 + (tileWidth - this._width) / 2;
-        this._maxY = tileHeight * row + 1 + (tileHeight - this._height) / 2;
-        this._toRight = this._maxX > this._x;
-        this._toBottom = this._maxY > this._y;
-        this._isChecked = false;
-        this._isMovingX = false;
-        this._isMovingY = false;
-
-        this.update = function () {
-            if (!this._isVisible) return;
-
-            var now = Date.now();
-
-            if (this._bomb) this._zoomOut = true;
-
-            if (this._zoomOut) {
-                if (this._scale > 0) {
-                    this._scale = 1 - 1 / settings.zoomOutSpeed * (now - this._zoomStartTime);
-                } else {
-                    this._isVisible = false;
-                }
-            }
-            if (this._superBlast) {
-                if (this._superBlastLiveTime > 0) {
-                    this._superBlastLiveTime = 1 - 1 / settings.zoomOutSpeed * (now - this._zoomStartTime);
-                } else {
-                    this._isVisible = false;
-                }
-            }
-            this._width = (tileWidth - 2) * this._scale;
-            this._height = (tileHeight - 2) * this._scale;
-
-            if (this._zoomOut) {
-                this._x = tileWidth * col + 1 + (tileWidth - this._width) / 2;
-                this._y = tileHeight * row + 1 + (tileHeight - this._height) / 2;
-            } else {
-                var newX = this._startX + (this._maxX - this._startX) / settings.dropSpeed * (now - this._creationTime),
-                    newY = this._startY + (this._maxY - this._startY) / settings.dropSpeed * (now - this._creationTime);
-
-                if ((this._toRight && newX <= this._maxX) || (!this._toRight && newX >= this._maxX)) {
-                    this._x = newX;
-                    this._isMovingX = true;
-                } else {
-                    this._x = this._maxX;
-                    if (this._isMovingX) {
-                        this._isChecked = false;
-                        this._isMovingX = false;
-                    }
-                }
-
-                if ((this._toBottom && newY <= this._maxY) || (!this._toBottom && newY >= this._maxY)) {
-                    this._y = newY;
-                    this._isMovingY = true;
-                } else {
-                    this._y = this._maxY;
-                    if (this._isMovingY) {
-                        this._isChecked = false;
-                        this._isMovingY = false;
-                    }
-                }
-            }
-            if (this._bomb) {
-                ctx.drawImage(loadedImages['explosion'], this._x, this._y, this._width, this._height);
-            } else if (this._booster) {
-                ctx.drawImage(loadedImages['super' + this._booster], this._x - 1, this._y - 1, this._width + 2, this._height + 2);
-            } else {
-                ctx.drawImage(this._img, this._x, this._y, this._width, this._height);
-            }
-            if (this._isChecked) {
-                ctx.drawImage(loadedImages['checked'], this._x, this._y, this._width, this._height);
-            }
-        }
-        this._booster = booster;
-    }
-
-    set row(value) {
-        this._row = value;
-    }
-
-    set col(value) {
-        this._col = value;
-    }
-
-    set isVisible(value) {
-        this._isVisible = value;
-    }
-
-    set x(value) {
-        this._x = value;
-    }
-
-    set y(value) {
-        this._y = value;
-    }
-
-    set booster(value) {
-        this._booster = value;
-    }
-
-    set bomb(value) {
-        this._bomb = value;
-    }
-
-    set zoomOut(value) {
-        this._zoomOut = value;
-    }
-
-    set zoomStartTime(value) {
-        this._zoomStartTime = value;
-    }
-
-    set superBlast(value) {
-        this._superBlast = value;
-    }
-
-    set isChecked(value) {
-        this._isChecked = value;
-    }
-
-    get row() {
-        return this._row;
-    }
-
-    get col() {
-        return this._col;
-    }
-
-    get isVisible() {
-        return this._isVisible;
-    }
-
-    get color() {
-        return this._color;
-    }
-
-    get x() {
-        return this._x;
-    }
-
-    get y() {
-        return this._y;
-    }
-
-    get booster() {
-        return this._booster;
-    }
-
-    get isChecked() {
-        return this._isChecked;
-    }
-}
-
 function clickTile(x, y) {
     var row, col;
     row = Math.floor(y / tileHeight);
     col = Math.floor(x / tileWidth);
     if (row >= settings.levels[level].rows || col >= settings.levels[level].cols) return;
     tilesWillDrop = false;
-    hasSuperTile = false;
     fieldWillBlast = false;
     rowWillBlast = false;
     createBlastMatrix(true);
@@ -186,20 +12,12 @@ function clickTile(x, y) {
         teleportTiles(row, col);
         return;
     } else if (bombActive) {
-        setCounters(movesLeft, score, shufflesLeft, --bombsLeft);
-        if (!settings.bonusForCoins && !bombsLeft) {
-            Nodes.game.classList.add('no-bombs');
-        }
-        if (settings.bonusForCoins) {
-            updateCoins(-settings.cost.bombs);
-        }
-        bombActive = false;
-        //don't count bomb as a move
-        movesLeft++;
-        Nodes.bombButton.classList.remove('active');
         findBombArea(row, col);
+        setCounters(movesLeft, score, shufflesLeft, --bombsLeft);
+        updateCoins(-settings.cost.bombs);
         Sounds.bomb.play();
         if (rowWillBlast) Sounds.row.play();
+        Nodes.bombButton.classList.remove('active');
     } else if (tiles[row][col].booster) {
         if (tiles[row][col].booster === 'All') {
             Sounds.fieldBlast.play();
@@ -211,9 +29,7 @@ function clickTile(x, y) {
     } else {
         findArea(row, col);
         countBlastTiles();
-        if (!hasSuperTile && blastCount >= settings.levels[level].minBlastCount) {
-            checkForSuperTile(row, col);
-        }
+        checkForSuperTile(row, col);
     }
     countBlastTiles();
 
@@ -235,41 +51,71 @@ function findArea(row, col) {
             for (j = 0; j < settings.levels[level].cols; j++) {
                 if (blastMatrix[i][j] && tiles[i][j].booster) {
                     findSuperArea(i, j);
-                    hasSuperTile = true;
                 }
             }
         }
     }
 }
 
+function findMatchingNeighbours(i, j, color) {
+    //top cell
+    if (isMatching(i - 1, j, color)) {
+        blastMatrix[i - 1][j] = 1;
+        updateExtremePoints(i - 1, j);
+        findMatchingNeighbours(i - 1, j, color);
+    }
+    //left cell
+    if (isMatching(i, j - 1, color)) {
+        blastMatrix[i][j - 1] = 1;
+        updateExtremePoints(i, j - 1);
+        findMatchingNeighbours(i, j - 1, color);
+    }
+    //right cell
+    if (isMatching(i, j + 1, color)) {
+        blastMatrix[i][j + 1] = 1;
+        updateExtremePoints(i, j + 1);
+        findMatchingNeighbours(i, j + 1, color);
+    }
+    //bottom cell
+    if (isMatching(i + 1, j, color)) {
+        blastMatrix[i + 1][j] = 1;
+        updateExtremePoints(i + 1, j);
+        findMatchingNeighbours(i + 1, j, color);
+    }
+}
+
+function isMatching(row, col, color) {
+    return (col >= 0 && col < settings.levels[level].cols && row >= 0 && row < settings.levels[level].rows) &&
+        !tiles[row][col].booster &&
+        tiles[row][col].color === color && !blastMatrix[row][col];
+}
+
 function findSuperArea(row, col, forBlast) {
     var i, j;
     if (tiles[row][col].booster === 'H') {
         for (i = 0; i < settings.levels[level].cols; i++) {
-            if (!blastMatrix[row][i]) {
-                blastMatrix[row][i] = 1;
-                if (forBlast && !tiles[row][i].booster) {
-                    tiles[row][i].booster = 'H';
-                    rowWillBlast = true;
-                }
-                updateExtremePoints(row, i);
-                if (settings.chainSuperTiles && i !== col && tiles[row][i].booster) {
-                    findSuperArea(row, i, forBlast);
-                }
+            if (blastMatrix[row][i]) continue;
+            blastMatrix[row][i] = 1;
+            if (forBlast && (!tiles[row][i].booster || !settings.chainSuperTiles)) {
+                tiles[row][i].booster = 'H';
+                rowWillBlast = true;
+            }
+            updateExtremePoints(row, i);
+            if (settings.chainSuperTiles && i !== col && tiles[row][i].booster) {
+                findSuperArea(row, i, forBlast);
             }
         }
     } else if (tiles[row][col].booster === 'V') {
         for (i = 0; i < settings.levels[level].rows; i++) {
-            if (!blastMatrix[i][col]) {
-                blastMatrix[i][col] = 1;
-                if (forBlast && !tiles[i][col].booster) {
-                    tiles[i][col].booster = 'V';
-                    rowWillBlast = true;
-                }
-                updateExtremePoints(i, col);
-                if (settings.chainSuperTiles && i !== row && tiles[i][col].booster) {
-                    findSuperArea(i, col, forBlast);
-                }
+            if (blastMatrix[i][col]) continue;
+            blastMatrix[i][col] = 1;
+            if (forBlast && (!tiles[i][col].booster || !settings.chainSuperTiles)) {
+                tiles[i][col].booster = 'V';
+                rowWillBlast = true;
+            }
+            updateExtremePoints(i, col);
+            if (settings.chainSuperTiles && i !== row && tiles[i][col].booster) {
+                findSuperArea(i, col, forBlast);
             }
         }
     } else if (tiles[row][col].booster === 'All') {
@@ -304,6 +150,7 @@ function findBombArea(row, col) {
     for (i = 0; i < settings.levels[level].rows; i++) {
         for (j = 0; j < settings.levels[level].cols; j++) {
             if (i >= y1 && i <= y2 && j >= x1 && j <= x2) {
+                //leave corner tiles for circle-like blast area
                 if (radius > 1 && ((i === y1 && j === x1) || (i === y1 && j === x2) || (i === y2 && j === x1) || (i === y2 && j === x2))) {
                     continue;
                 }
@@ -338,19 +185,12 @@ function teleportTiles(row, col) {
         teleportActive = false;
         controlsDisabled = true;
 
-        if (!settings.bonusForCoins && !teleportsLeft) {
-            Nodes.game.classList.add('no-teleports');
-        }
-
-        if (settings.bonusForCoins) {
-            updateCoins(-settings.cost.teleports);
-        }
+        updateCoins(-settings.cost.teleports);
 
         setCounters(movesLeft, score, shufflesLeft, bombsLeft, --teleportsLeft);
 
         Nodes.teleportButton.classList.remove('active');
         Sounds.teleport.play();
-
 
         setTimeout(function () {
             controlsDisabled = false;
@@ -358,7 +198,7 @@ function teleportTiles(row, col) {
             if (!moveExists) {
                 shuffleField(true);
             }
-        }, settings.dropSpeed)
+        }, settings.dropTime)
     }
 }
 
@@ -394,14 +234,20 @@ function processTiles(row, col) {
     var dropTimeout;
     controlsDisabled = true;
     blastArea();
-    setCounters(--movesLeft, score);
+    if (!bombActive) {
+        setCounters(--movesLeft, score);
+    } else {
+        //don't count bomb as a move
+        setCounters(movesLeft, score);
+    }
+    bombActive = false;
     updateScore();
     Sounds.pop.play();
     setTimeout(function () {
         dropTiles();
         dropTimeout = settings.animationDelay;
         if (settings.waitForDropEnd) {
-            dropTimeout = tilesWillDrop ? settings.dropSpeed + settings.animationDelay : settings.animationDelay;
+            dropTimeout = tilesWillDrop ? settings.dropTime + settings.animationDelay : settings.animationDelay;
         }
         tilesWillDrop = false;
 
@@ -428,42 +274,9 @@ function processTiles(row, col) {
                         shuffleField(true);
                     }
                 }
-            }, settings.dropSpeed)
+            }, settings.dropTime)
         }, dropTimeout)
-    }, settings.zoomOutSpeed + settings.animationDelay)
-}
-
-function isMatching(row, col, color) {
-    return (col >= 0 && col < settings.levels[level].cols && row >= 0 && row < settings.levels[level].rows) &&
-        !tiles[row][col].booster &&
-        tiles[row][col].color === color && !blastMatrix[row][col];
-}
-
-function findMatchingNeighbours(i, j, color) {
-    //top cell
-    if (isMatching(i - 1, j, color)) {
-        blastMatrix[i - 1][j] = 1;
-        updateExtremePoints(i - 1, j);
-        findMatchingNeighbours(i - 1, j, color);
-    }
-    //left cell
-    if (isMatching(i, j - 1, color)) {
-        blastMatrix[i][j - 1] = 1;
-        updateExtremePoints(i, j - 1);
-        findMatchingNeighbours(i, j - 1, color);
-    }
-    //right cell
-    if (isMatching(i, j + 1, color)) {
-        blastMatrix[i][j + 1] = 1;
-        updateExtremePoints(i, j + 1);
-        findMatchingNeighbours(i, j + 1, color);
-    }
-    //bottom cell
-    if (isMatching(i + 1, j, color)) {
-        blastMatrix[i + 1][j] = 1;
-        updateExtremePoints(i + 1, j);
-        findMatchingNeighbours(i + 1, j, color);
-    }
+    }, settings.zoomOutTime + settings.animationDelay)
 }
 
 function updateExtremePoints(row, col) {
@@ -579,14 +392,8 @@ function shuffleField(isAuto) {
         }
         autoshufflesLeft--;
     } else {
-        if (settings.bonusForCoins) {
-            updateCoins(-settings.cost.shuffles);
-        }
+        updateCoins(-settings.cost.shuffles);
         setCounters(movesLeft, score, --shufflesLeft);
-    }
-
-    if (!settings.bonusForCoins && !shufflesLeft) {
-        Nodes.game.classList.add('no-shuffles');
     }
 
     var id, i = 0, row, col, newRow, newCol, length, idArray = [], shuffledTiles = [];
@@ -597,6 +404,7 @@ function shuffleField(isAuto) {
         if (!shuffledTiles[row]) shuffledTiles[row] = [];
     }
 
+    //shuffle tiles
     while (idArray.length < length) {
         id = Math.floor(Math.random() * length);
         if (idArray.indexOf(id) === -1) {
@@ -610,6 +418,7 @@ function shuffleField(isAuto) {
         }
     }
 
+    //recreate tiles
     for (row = 0; row < settings.levels[level].rows; row++) {
         for (col = 0; col < settings.levels[level].cols; col++) {
             tiles[row][col] = new Tile(row, col, shuffledTiles[row][col].color, shuffledTiles[row][col].x, shuffledTiles[row][col].y, 1, shuffledTiles[row][col].booster);
@@ -622,14 +431,14 @@ function shuffleField(isAuto) {
         if (autoshufflesLeft > 0) {
             setTimeout(function () {
                 shuffleField(true);
-            }, settings.dropSpeed)
+            }, settings.dropTime)
         } else {
             controlsDisabled = true;
 
             setTimeout(function () {
                 Nodes.game.classList.add('lose');
                 Sounds.lose.play();
-            }, settings.dropSpeed)
+            }, settings.dropTime)
         }
     }
 }

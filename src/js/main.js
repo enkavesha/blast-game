@@ -2,9 +2,10 @@ Howler.autoSuspend = false;
 
 var settings = {
         scoreChangeTime: 500,
-        zoomOutSpeed: 300,
-        dropSpeed: 300,
+        zoomOutTime: 300,
+        dropTime: 300,
         animationDelay: 100,
+        //generate new tiles after dropping end
         waitForDropEnd: false,
         levelNumber: 3,
         supertileActivationNumber: 5,
@@ -14,6 +15,7 @@ var settings = {
         resetCoinsOnRestart: true,
         chainSuperTiles: true,
         startCoins: 0,
+        //buy bonus for coins or use predefined quantity
         bonusForCoins: true,
         cost: {
             shuffles: 10,
@@ -167,7 +169,6 @@ var settings = {
     blastExtremePoints = {x1: -1, x2: -1, y1: -1, y2: -1, height: -1, width: -1},
     moveExists = false,
     tilesWillDrop = false,
-    hasSuperTile = false,
     fieldWillBlast = false,
     rowWillBlast = false,
     level = 0,
@@ -197,6 +198,8 @@ function start() {
         Nodes.teleports.innerText = settings.cost.teleports;
     }
     Nodes.coins.innerText = String(coins);
+    ctx = Nodes.field.getContext('2d');
+
     loadImages(images, function () {
         addEventListeners();
         startLevel();
@@ -235,8 +238,6 @@ function startLevel() {
 function createField() {
     var row, col;
 
-    ctx = Nodes.field.getContext('2d');
-
     for (row = 0; row < settings.levels[level].rows; row++) {
         if (!tiles[row]) tiles[row] = [];
         for (col = 0; col < settings.levels[level].cols; col++) {
@@ -254,9 +255,7 @@ function resizeCanvas() {
     tileHeight = tileWidth / 0.89;
     ch = tileHeight * settings.levels[level].rows;
     Nodes.field.width = cw;
-    if (Nodes.field.height < ch) {
-        Nodes.field.height = ch;
-    }
+    Nodes.field.height = ch;
     ctxBounds = Nodes.field.getBoundingClientRect();
 
     if (tiles.length > 0) {

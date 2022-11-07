@@ -1,6 +1,3 @@
-/**
- * Page level utilities
- */
 (function utils() {
     var isPortrait = true,
         game = document.getElementById('game'),
