@@ -286,7 +286,7 @@
     .paused &,
     .win &,
     .super-win &,
-    .lose &{
+    .lose & {
         pointer-events: none;
     }
 
@@ -416,7 +416,6 @@
         font-size: 5vh;
     }
 
-    .paused &,
     .win &,
     .lose &,
     .super-win & {
@@ -425,8 +424,14 @@
         transition: opacity 0.5s ease-in-out;
     }
 
+    .paused & {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
     .title {
         display: none;
+        text-align: center;
     }
 
     .paused & .pause-title,

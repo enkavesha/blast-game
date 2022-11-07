@@ -15,6 +15,7 @@ class Tile {
         this._superBlast = false;
         this._superBlastLiveTime = 1;
         this._booster = false;
+        this._bomb = false;
         this._creationTime = Date.now();
         this._startX = this._x;
         this._startY = this._y;
@@ -30,6 +31,8 @@ class Tile {
             if (!this._isVisible) return;
 
             var now = Date.now();
+
+            if (this._bomb) this._zoomOut = true;
 
             if (this._zoomOut) {
                 if (this._scale > 0) {
@@ -77,7 +80,9 @@ class Tile {
                     }
                 }
             }
-            if (this._booster) {
+            if (this._bomb) {
+                ctx.drawImage(loadedImages['explosion'], this._x, this._y, this._width, this._height);
+            } else if (this._booster) {
                 ctx.drawImage(loadedImages['super' + this._booster], this._x - 1, this._y - 1, this._width + 2, this._height + 2);
             } else {
                 ctx.drawImage(this._img, this._x, this._y, this._width, this._height);
@@ -111,6 +116,10 @@ class Tile {
 
     set booster(value) {
         this._booster = value;
+    }
+
+    set bomb(value) {
+        this._bomb = value;
     }
 
     set zoomOut(value) {
@@ -168,6 +177,8 @@ function clickTile(x, y) {
     col = Math.floor(x / tileWidth);
     tilesWillDrop = false;
     hasSuperTile = false;
+    fieldWillBlast = false;
+    rowWillBlast = false;
     createBlastMatrix(true);
 
     if (teleportActive) {
@@ -182,14 +193,24 @@ function clickTile(x, y) {
             updateCoins(-settings.cost.bombs);
         }
         bombActive = false;
+        //don't count bomb as a move
+        movesLeft++;
         Nodes.bombButton.classList.remove('active');
         findBombArea(row, col);
+        Sounds.bomb.play();
+        if (rowWillBlast) Sounds.row.play();
     } else if (tiles[row][col].booster) {
+        if (tiles[row][col].booster === 'All') {
+            Sounds.fieldBlast.play();
+        } else {
+            Sounds.row.play();
+        }
         findSuperArea(row, col, true);
+        if (fieldWillBlast) Sounds.fieldBlast.play();
     } else {
         findArea(row, col);
         countBlastTiles();
-        if (!hasSuperTile) {
+        if (!hasSuperTile && blastCount >= settings.levels[level].minBlastCount) {
             checkForSuperTile(row, col);
         }
     }
@@ -226,7 +247,10 @@ function findSuperArea(row, col, forBlast) {
         for (i = 0; i < settings.levels[level].cols; i++) {
             if (!blastMatrix[row][i]) {
                 blastMatrix[row][i] = 1;
-                if (forBlast && !tiles[row][i].booster) tiles[row][i].booster = 'H';
+                if (forBlast && !tiles[row][i].booster) {
+                    tiles[row][i].booster = 'H';
+                    rowWillBlast = true;
+                }
                 updateExtremePoints(row, i);
                 if (settings.chainSuperTiles && i !== col && tiles[row][i].booster) {
                     findSuperArea(row, i, forBlast);
@@ -237,7 +261,10 @@ function findSuperArea(row, col, forBlast) {
         for (i = 0; i < settings.levels[level].rows; i++) {
             if (!blastMatrix[i][col]) {
                 blastMatrix[i][col] = 1;
-                if (forBlast && !tiles[i][col].booster) tiles[i][col].booster = 'V';
+                if (forBlast && !tiles[i][col].booster) {
+                    tiles[i][col].booster = 'V';
+                    rowWillBlast = true;
+                }
                 updateExtremePoints(i, col);
                 if (settings.chainSuperTiles && i !== row && tiles[i][col].booster) {
                     findSuperArea(i, col, forBlast);
@@ -246,9 +273,12 @@ function findSuperArea(row, col, forBlast) {
         }
     } else if (tiles[row][col].booster === 'All') {
         createBlastMatrix(false);
-        for (i = 0; i < settings.levels[level].rows; i++) {
-            for (j = 0; j < settings.levels[level].cols; j++) {
-                tiles[i][j].booster = 'All';
+        if (forBlast) {
+            fieldWillBlast = true;
+            for (i = 0; i < settings.levels[level].rows; i++) {
+                for (j = 0; j < settings.levels[level].cols; j++) {
+                    tiles[i][j].booster = 'Cross';
+                }
             }
         }
         blastExtremePoints = {
@@ -277,7 +307,8 @@ function findBombArea(row, col) {
                     continue;
                 }
                 blastMatrix[i][j] = 1;
-                if (settings.chainSuperTiles && tiles[i][j].booster) findSuperArea(i, j);
+                tiles[i][j].bomb = true;
+                if (settings.chainSuperTiles && tiles[i][j].booster) findSuperArea(i, j, true);
             }
         }
     }
@@ -289,6 +320,7 @@ function findBombArea(row, col) {
 
 function teleportTiles(row, col) {
     if (tiles[row][col].booster) return;
+    Sounds.select.play();
     tiles[row][col].isChecked = true;
     if (!teleportingTile) {
         teleportingTile = new Tile(row, col, tiles[row][col].color, null, null, 1, tiles[row][col].booster);
@@ -303,8 +335,7 @@ function teleportTiles(row, col) {
 
         teleportingTile = false;
         teleportActive = false;
-
-        setCounters(movesLeft, score, shufflesLeft, bombsLeft, --teleportsLeft);
+        controlsDisabled = true;
 
         if (!settings.bonusForCoins && !teleportsLeft) {
             Nodes.game.classList.add('no-teleports');
@@ -313,7 +344,19 @@ function teleportTiles(row, col) {
         if (settings.bonusForCoins) {
             updateCoins(-settings.cost.teleports);
         }
+
+        setCounters(movesLeft, score, shufflesLeft, bombsLeft, --teleportsLeft);
+
         Nodes.teleportButton.classList.remove('active');
+        Sounds.teleport.play();
+
+
+        setTimeout(function () {
+            findMove();
+            if (!moveExists) {
+                shuffleField(true);
+            }
+        }, settings.dropSpeed)
     }
 }
 
@@ -351,7 +394,7 @@ function processTiles(row, col) {
     blastArea();
     setCounters(--movesLeft, score);
     updateScore();
-    // updateCoins(10);
+    Sounds.pop.play();
     setTimeout(function () {
         dropTiles();
         dropTimeout = settings.animationDelay;
@@ -371,9 +414,11 @@ function processTiles(row, col) {
                         Nodes.game.classList.add('win');
                     }
                     controlsDisabled = true;
+                    Sounds.win.play();
                 } else if (!movesLeft) {
                     Nodes.game.classList.add('lose');
                     controlsDisabled = true;
+                    Sounds.lose.play();
                 } else {
                     controlsDisabled = false;
                     findMove();
@@ -522,10 +567,12 @@ function generateNewTiles() {
 }
 
 function shuffleField(isAuto) {
+    Sounds.shuffle.play();
     if (isAuto) {
         if (autoshufflesLeft <= 0) {
             Nodes.game.classList.add('lose');
             controlsDisabled = true;
+            Sounds.lose.play();
             return;
         }
         autoshufflesLeft--;
@@ -579,6 +626,7 @@ function shuffleField(isAuto) {
 
             setTimeout(function () {
                 Nodes.game.classList.add('lose');
+                Sounds.lose.play();
             }, settings.dropSpeed)
         }
     }

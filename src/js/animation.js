@@ -100,5 +100,6 @@ function bounceCoin() {
     if (bouncingCoin) bouncingCoin.update();
     if (!superTile) return;
     bouncingCoin = new Coin(superTile.x + tileWidth / 4, superTile.y);
+    Sounds.coin.play();
     superTile = false;
 }

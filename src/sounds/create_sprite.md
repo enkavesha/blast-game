@@ -1,0 +1,1 @@
+audiosprite -f howler -e mp3 -b 32 -g 0.5 coin.mp3
