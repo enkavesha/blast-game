@@ -175,6 +175,7 @@ function clickTile(x, y) {
     var row, col;
     row = Math.floor(y / tileHeight);
     col = Math.floor(x / tileWidth);
+    if (row >= settings.levels[level].rows || col >= settings.levels[level].cols) return;
     tilesWillDrop = false;
     hasSuperTile = false;
     fieldWillBlast = false;
@@ -352,6 +353,7 @@ function teleportTiles(row, col) {
 
 
         setTimeout(function () {
+            controlsDisabled = false;
             findMove();
             if (!moveExists) {
                 shuffleField(true);

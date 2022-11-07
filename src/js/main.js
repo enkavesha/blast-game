@@ -7,10 +7,11 @@ var settings = {
         animationDelay: 100,
         waitForDropEnd: false,
         levelNumber: 3,
-        supertileActivationNumber: 7,
-        fieldblastActivationNumber: 8,
+        supertileActivationNumber: 5,
+        fieldblastActivationNumber: 10,
         tilesScoreMultiplier: 10,
         autoshuffleNumber: 2,
+        resetCoinsOnRestart: true,
         chainSuperTiles: true,
         startCoins: 0,
         bonusForCoins: true,
@@ -315,6 +316,10 @@ function addEventListeners() {
     })
     Nodes.restartButton.addEventListener('click', function () {
         level = 0;
+        if (settings.resetCoinsOnRestart) {
+            coins = 0;
+            updateCoins(0);
+        }
         startLevel();
         Sounds.button.play();
     })
