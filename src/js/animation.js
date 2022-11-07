@@ -12,8 +12,8 @@ function animateTiles() {
 
     ctx.clearRect(0, 0, cw, ch);
 
-    for (row = 0; row < settings.levels[level].rows; row++) {
-        for (col = 0; col < settings.levels[level].cols; col++) {
+    for (row = 0; row < levelConfig[level].rows; row++) {
+        for (col = 0; col < levelConfig[level].cols; col++) {
             if (tiles[row] && tiles[row][col]) {
                 tiles[row][col].update();
             }
@@ -28,7 +28,7 @@ function animateScore() {
     timeDiff = now - scoreStartTime;
     scoreDiff = score - curScore;
     newScore = curScore + scoreDiff / settings.scoreChangeTime * timeDiff;
-    progress = newScore / settings.levels[level].goal * 100;
+    progress = newScore / levelConfig[level].goal * 100;
     if (newScore >= score) {
         Nodes.score.innerText = String(score);
     } else {

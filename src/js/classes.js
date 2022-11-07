@@ -8,7 +8,7 @@ class Tile {
         this._height = (tileHeight - 2) * this._scale;
         this._x = x || tileWidth * this._col + 1 + (tileWidth - this._width) / 2;
         this._y = y || tileHeight * this._row + 1 + (tileHeight - this._height) / 2;
-        this._color = color > -1 ? color : Math.floor(Math.random() * settings.levels[level].colorNumber);
+        this._color = color > -1 ? color : Math.floor(Math.random() * levelConfig[level].colorNumber);
         this._img = loadedImages['tile' + this._color];
         this._zoomOut = false;
         this._zoomStartTime = 0;

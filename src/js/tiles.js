@@ -2,7 +2,7 @@ function clickTile(x, y) {
     var row, col;
     row = Math.floor(y / tileHeight);
     col = Math.floor(x / tileWidth);
-    if (row >= settings.levels[level].rows || col >= settings.levels[level].cols) return;
+    if (row >= levelConfig[level].rows || col >= levelConfig[level].cols) return;
     tilesWillDrop = false;
     fieldWillBlast = false;
     rowWillBlast = false;
@@ -47,8 +47,8 @@ function findArea(row, col) {
     findMatchingNeighbours(row, col, color, blastMatrix);
 
     if (settings.chainSuperTiles) {
-        for (i = 0; i < settings.levels[level].rows; i++) {
-            for (j = 0; j < settings.levels[level].cols; j++) {
+        for (i = 0; i < levelConfig[level].rows; i++) {
+            for (j = 0; j < levelConfig[level].cols; j++) {
                 if (blastMatrix[i][j] && tiles[i][j].booster) {
                     findSuperArea(i, j);
                 }
@@ -85,7 +85,7 @@ function findMatchingNeighbours(i, j, color) {
 }
 
 function isMatching(row, col, color) {
-    return (col >= 0 && col < settings.levels[level].cols && row >= 0 && row < settings.levels[level].rows) &&
+    return (col >= 0 && col < levelConfig[level].cols && row >= 0 && row < levelConfig[level].rows) &&
         !tiles[row][col].booster &&
         tiles[row][col].color === color && !blastMatrix[row][col];
 }
@@ -93,7 +93,7 @@ function isMatching(row, col, color) {
 function findSuperArea(row, col, forBlast) {
     var i, j;
     if (tiles[row][col].booster === 'H') {
-        for (i = 0; i < settings.levels[level].cols; i++) {
+        for (i = 0; i < levelConfig[level].cols; i++) {
             if (blastMatrix[row][i]) continue;
             blastMatrix[row][i] = 1;
             if (forBlast && (!tiles[row][i].booster || !settings.chainSuperTiles)) {
@@ -106,7 +106,7 @@ function findSuperArea(row, col, forBlast) {
             }
         }
     } else if (tiles[row][col].booster === 'V') {
-        for (i = 0; i < settings.levels[level].rows; i++) {
+        for (i = 0; i < levelConfig[level].rows; i++) {
             if (blastMatrix[i][col]) continue;
             blastMatrix[i][col] = 1;
             if (forBlast && (!tiles[i][col].booster || !settings.chainSuperTiles)) {
@@ -122,33 +122,33 @@ function findSuperArea(row, col, forBlast) {
         createBlastMatrix(false);
         if (forBlast) {
             fieldWillBlast = true;
-            for (i = 0; i < settings.levels[level].rows; i++) {
-                for (j = 0; j < settings.levels[level].cols; j++) {
+            for (i = 0; i < levelConfig[level].rows; i++) {
+                for (j = 0; j < levelConfig[level].cols; j++) {
                     tiles[i][j].booster = 'Cross';
                 }
             }
         }
         blastExtremePoints = {
             x1: 0,
-            x2: settings.levels[level].cols - 1,
+            x2: levelConfig[level].cols - 1,
             y1: 0,
-            y2: settings.levels[level].rows - 1,
-            width: settings.levels[level].cols,
-            height: settings.levels[level].rows
+            y2: levelConfig[level].rows - 1,
+            width: levelConfig[level].cols,
+            height: levelConfig[level].rows
         }
     }
 }
 
 function findBombArea(row, col) {
     var i, j,
-        radius = settings.levels[level].bombRadius,
+        radius = levelConfig[level].bombRadius,
         x1 = col - radius,
         x2 = col + radius,
         y1 = row - radius,
         y2 = row + radius;
 
-    for (i = 0; i < settings.levels[level].rows; i++) {
-        for (j = 0; j < settings.levels[level].cols; j++) {
+    for (i = 0; i < levelConfig[level].rows; i++) {
+        for (j = 0; j < levelConfig[level].cols; j++) {
             if (i >= y1 && i <= y2 && j >= x1 && j <= x2) {
                 //leave corner tiles for circle-like blast area
                 if (radius > 1 && ((i === y1 && j === x1) || (i === y1 && j === x2) || (i === y2 && j === x1) || (i === y2 && j === x2))) {
@@ -207,9 +207,9 @@ function createBlastMatrix(isEmpty) {
     blastMatrix = [];
     state = isEmpty ? 0 : 1;
 
-    for (i = 0; i < settings.levels[level].rows; i++) {
+    for (i = 0; i < levelConfig[level].rows; i++) {
         if (!blastMatrix[i]) blastMatrix[i] = [];
-        for (j = 0; j < settings.levels[level].cols; j++) {
+        for (j = 0; j < levelConfig[level].cols; j++) {
             blastMatrix[i].push(state);
         }
     }
@@ -218,8 +218,8 @@ function createBlastMatrix(isEmpty) {
 function countBlastTiles() {
     blastCount = 0;
     var i, j;
-    for (i = 0; i < settings.levels[level].rows; i++) {
-        for (j = 0; j < settings.levels[level].cols; j++) {
+    for (i = 0; i < levelConfig[level].rows; i++) {
+        for (j = 0; j < levelConfig[level].cols; j++) {
             if (blastMatrix[i][j]) {
                 blastCount++;
                 if (i && !blastMatrix[i - 1][j]) tilesWillDrop = true;
@@ -229,8 +229,8 @@ function countBlastTiles() {
 }
 
 function processTiles(row, col) {
-    if ((tiles[row][col].booster && blastCount < settings.levels[level].minBlastCount - 1) ||
-        (!tiles[row][col].booster && blastCount < settings.levels[level].minBlastCount)) return;
+    if ((tiles[row][col].booster && blastCount < levelConfig[level].minBlastCount - 1) ||
+        (!tiles[row][col].booster && blastCount < levelConfig[level].minBlastCount)) return;
     var dropTimeout;
     controlsDisabled = true;
     blastArea();
@@ -255,7 +255,7 @@ function processTiles(row, col) {
             generateNewTiles();
 
             setTimeout(function () {
-                if (score >= settings.levels[level].goal) {
+                if (score >= levelConfig[level].goal) {
                     if (level + 1 >= settings.levelNumber) {
                         Nodes.game.classList.add('super-win');
                     } else {
@@ -320,12 +320,12 @@ function checkForSuperTile(row, col) {
 function findMove() {
     moveExists = false;
     var i, j;
-    for (i = 0; i < settings.levels[level].rows; i++) {
-        for (j = 0; j < settings.levels[level].cols; j++) {
+    for (i = 0; i < levelConfig[level].rows; i++) {
+        for (j = 0; j < levelConfig[level].cols; j++) {
             createBlastMatrix(true);
             findArea(i, j);
             countBlastTiles();
-            if (blastCount >= settings.levels[level].minBlastCount) {
+            if (blastCount >= levelConfig[level].minBlastCount) {
                 moveExists = true;
                 return;
             }
@@ -335,8 +335,8 @@ function findMove() {
 
 function blastArea(isCompleteBlast) {
     var row, col;
-    for (row = 0; row < settings.levels[level].rows; row++) {
-        for (col = 0; col < settings.levels[level].cols; col++) {
+    for (row = 0; row < levelConfig[level].rows; row++) {
+        for (col = 0; col < levelConfig[level].cols; col++) {
             if ((isCompleteBlast || blastMatrix[row][col]) && tiles[row] && tiles[row][col]) {
                 if (!tiles[row][col].booster) {
                     tiles[row][col].zoomOut = true;
@@ -352,8 +352,8 @@ function blastArea(isCompleteBlast) {
 
 function dropTiles() {
     var row, col, prevRow, curRow;
-    for (row = settings.levels[level].rows - 1; row > 0; row--) {
-        for (col = 0; col < settings.levels[level].cols; col++) {
+    for (row = levelConfig[level].rows - 1; row > 0; row--) {
+        for (col = 0; col < levelConfig[level].cols; col++) {
             if ((tiles[row] && tiles[row][col] && tiles[row][col].isVisible)) continue;
             prevRow = row - 1;
             curRow = row;
@@ -373,8 +373,8 @@ function dropTiles() {
 
 function generateNewTiles() {
     var row, col;
-    for (row = 0; row < settings.levels[level].rows; row++) {
-        for (col = 0; col < settings.levels[level].cols; col++) {
+    for (row = 0; row < levelConfig[level].rows; row++) {
+        for (col = 0; col < levelConfig[level].cols; col++) {
             if (tiles[row][col].isVisible) continue;
             tiles[row][col] = new Tile(row, col, -1, tileWidth * col + 1, -tileHeight * (blastExtremePoints.height - row + 1));
         }
@@ -398,9 +398,9 @@ function shuffleField(isAuto) {
 
     var id, i = 0, row, col, newRow, newCol, length, idArray = [], shuffledTiles = [];
 
-    length = settings.levels[level].rows * settings.levels[level].cols;
+    length = levelConfig[level].rows * levelConfig[level].cols;
 
-    for (row = 0; row < settings.levels[level].rows; row++) {
+    for (row = 0; row < levelConfig[level].rows; row++) {
         if (!shuffledTiles[row]) shuffledTiles[row] = [];
     }
 
@@ -409,18 +409,18 @@ function shuffleField(isAuto) {
         id = Math.floor(Math.random() * length);
         if (idArray.indexOf(id) === -1) {
             idArray.push(id);
-            row = Math.floor(i / settings.levels[level].cols);
-            col = i - settings.levels[level].cols * row;
-            newRow = Math.floor(id / settings.levels[level].cols);
-            newCol = id - settings.levels[level].cols * newRow;
+            row = Math.floor(i / levelConfig[level].cols);
+            col = i - levelConfig[level].cols * row;
+            newRow = Math.floor(id / levelConfig[level].cols);
+            newCol = id - levelConfig[level].cols * newRow;
             shuffledTiles[newRow][newCol] = new Tile(newRow, newCol, tiles[row][col].color, tiles[row][col].x, tiles[row][col].y, 1, tiles[row][col].booster);
             i++;
         }
     }
 
     //recreate tiles
-    for (row = 0; row < settings.levels[level].rows; row++) {
-        for (col = 0; col < settings.levels[level].cols; col++) {
+    for (row = 0; row < levelConfig[level].rows; row++) {
+        for (col = 0; col < levelConfig[level].cols; col++) {
             tiles[row][col] = new Tile(row, col, shuffledTiles[row][col].color, shuffledTiles[row][col].x, shuffledTiles[row][col].y, 1, shuffledTiles[row][col].booster);
         }
     }

@@ -1,5 +1,5 @@
 function setCounters(moves, score, shuffles, bombs, teleports) {
-    movesLeft = moves >= 0 ? moves : settings.levels[level].moves;
+    movesLeft = moves >= 0 ? moves : levelConfig[level].moves;
     Nodes.movesLeft.innerText = movesLeft;
     Nodes.score.innerText = score || '0';
     checkAvailableBonuses();

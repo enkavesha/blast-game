@@ -24,59 +24,6 @@ var settings = {
             superTile: 5,
             fieldblastTile: 10,
         },
-        levels: {
-            0: {
-                id: 0,
-                rows: 10,
-                cols: 10,
-                minBlastCount: 2,
-                moves: 10,
-                shuffles: 1,
-                bombs: 1,
-                bombRadius: 1,
-                teleports: 1,
-                get colorNumber() {
-                    return Math.floor(4 + this.id / 2)
-                },
-                get goal() {
-                    return 500 + this.id * 50
-                },
-            },
-            1: {
-                id: 1,
-                rows: 10,
-                cols: 10,
-                minBlastCount: 2,
-                moves: 10,
-                shuffles: 1,
-                bombs: 1,
-                bombRadius: 1,
-                teleports: 1,
-                get colorNumber() {
-                    return Math.floor(4 + this.id / 2)
-                },
-                get goal() {
-                    return 500 + this.id * 50
-                },
-            },
-            2: {
-                id: 2,
-                rows: 10,
-                cols: 10,
-                minBlastCount: 2,
-                moves: 10,
-                shuffles: 2,
-                bombs: 1,
-                bombRadius: 1,
-                teleports: 1,
-                get colorNumber() {
-                    return Math.floor(4 + this.id / 2)
-                },
-                get goal() {
-                    return 500 + this.id * 50
-                },
-            },
-        },
         languages: window.navigator.languages,
         locale: 'en',
     },
@@ -219,10 +166,10 @@ function startLevel() {
     score = 0;
     curScore = 0;
     Nodes.level.innerText = String(level + 1);
-    shufflesLeft = settings.levels[level].shuffles;
+    shufflesLeft = levelConfig[level].shuffles;
     autoshufflesLeft = settings.autoshuffleNumber;
-    bombsLeft = settings.levels[level].bombs;
-    teleportsLeft = settings.levels[level].teleports;
+    bombsLeft = levelConfig[level].bombs;
+    teleportsLeft = levelConfig[level].teleports;
     createField();
     Nodes.game.classList.remove('win', 'lose', 'super-win', 'no-shuffles', 'no-bombs', 'no-teleports');
     Nodes.game.classList.add('progress-reset');
@@ -238,9 +185,9 @@ function startLevel() {
 function createField() {
     var row, col;
 
-    for (row = 0; row < settings.levels[level].rows; row++) {
+    for (row = 0; row < levelConfig[level].rows; row++) {
         if (!tiles[row]) tiles[row] = [];
-        for (col = 0; col < settings.levels[level].cols; col++) {
+        for (col = 0; col < levelConfig[level].cols; col++) {
             tiles[row][col] = new Tile(row, col);
         }
     }
@@ -251,16 +198,16 @@ function resizeCanvas() {
     Nodes.field.width = 0;
     Nodes.field.height = 0;
     cw = Nodes.fieldContainer.getBoundingClientRect().width;
-    tileWidth = cw / settings.levels[level].cols;
+    tileWidth = cw / levelConfig[level].cols;
     tileHeight = tileWidth / 0.89;
-    ch = tileHeight * settings.levels[level].rows;
+    ch = tileHeight * levelConfig[level].rows;
     Nodes.field.width = cw;
     Nodes.field.height = ch;
     ctxBounds = Nodes.field.getBoundingClientRect();
 
     if (tiles.length > 0) {
-        for (row = 0; row < settings.levels[level].rows; row++) {
-            for (col = 0; col < settings.levels[level].cols; col++) {
+        for (row = 0; row < levelConfig[level].rows; row++) {
+            for (col = 0; col < levelConfig[level].cols; col++) {
                 isChecked = tiles[row][col].isChecked;
                 tiles[row][col] = new Tile(row, col, tiles[row][col].color, null, null, 1, tiles[row][col].booster);
                 tiles[row][col].isChecked = isChecked;
