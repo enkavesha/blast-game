@@ -63,7 +63,7 @@ function watchFiles() {
 }
 
 const build = series(clean, parallel(css, js));
-const watch = series(css, js, parallel(watchFiles));
+const watch = series(css, js, watchFiles);
 const sync = series(css, js, parallel(watchFiles, browserSync));
 
 exports.js = js;
